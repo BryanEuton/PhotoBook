@@ -1,0 +1,47 @@
+﻿.paged-results-form {
+    .btn-toolbar {
+        .dropdown {
+            margin-top: 10px;
+        }
+        + .btn-toolbar {
+            margin-top: 10px;
+        }
+    }
+}
+.paged-results {
+    @extend .row;
+    .num-results {
+        margin-top: 10px;
+        padding-left: 15px;
+    }
+    &.three-col > .image-holder {
+        @extend .col-md-4;
+    }
+
+    &.four-col > .image-holder {
+        @extend .col-md-3;
+    }
+
+    .pagination {
+        flex: 100%;
+    }
+
+    .image-holder {
+        @extend .col-sm-6;
+        margin-bottom: 15px;
+
+        img {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        &.enlarged {
+            min-width: 600px;
+            width: 100%;
+
+            img {
+                width: 100%;
+            }
+        }
+    }
+}

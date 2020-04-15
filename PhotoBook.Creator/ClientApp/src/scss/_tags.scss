@@ -1,0 +1,21 @@
+﻿form.tag-form {
+    label {
+        font-weight: bold;
+    }
+}
+.tags {
+    > .btn {
+        margin-bottom: 20px;
+    }
+    .tag {
+        margin-bottom: 10px;
+        .btn + .btn {
+            margin-left: 10px;
+        }
+    }
+}
+.tag-types {
+    > .btn {
+        margin-bottom: 20px;
+    }
+}

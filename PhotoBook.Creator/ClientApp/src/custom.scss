@@ -1,0 +1,24 @@
+﻿// Override default variables before the import
+//$body-bg: #000;
+
+// Import Bootstrap and its default variables
+@import '../node_modules/bootstrap/scss/bootstrap.scss';
+
+
+/* Provide sufficient contrast against white background */
+@import 'scss/_global.scss';
+@import 'scss/_search.scss';
+@import 'scss/_paged-results.scss';
+@import 'scss/_tags.scss';
+@import 'scss/_photo-books.scss';
+@import 'scss/components/_nav-menu.scss';
+@import 'scss/components/_comment.scss';
+@import 'scss/components/_context-menu.scss';
+@import 'scss/components/_image-holder.scss';
+@import 'scss/components/_swiper.scss';
+@import 'scss/components/_toast.scss';
+@import 'scss/components/modals/_enlarged-modal.scss';
+@import 'scss/components/modals/_face-modal.scss';
+@import 'scss/components/modals/_location-modal.scss';
+@import 'scss/components/behaviors/_image-map.scss';
+@import 'scss/components/behaviors/_draggable.scss';
