@@ -3,6 +3,7 @@ import { Component } from 'react';
 import authService from './AuthorizeService';
 import { AuthenticationResultStatus } from './AuthorizeService';
 import { QueryParameterNames, LogoutActions, ApplicationPaths } from './ApiAuthorizationConstants';
+import { clientService } from '../services';
 
 // The main responsibility of this component is to handle the user's logout process.
 // This is the starting point for the logout process, which is usually initiated when a
@@ -73,6 +74,7 @@ export class Logout extends Component {
                 case AuthenticationResultStatus.Redirect:
                     break;
                 case AuthenticationResultStatus.Success:
+                    await clientService.clearCookies();
                     await this.navigateToReturnUrl(returnUrl);
                     break;
                 case AuthenticationResultStatus.Fail:

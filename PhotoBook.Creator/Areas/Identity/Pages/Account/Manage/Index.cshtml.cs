@@ -43,6 +43,10 @@ namespace PhotoBook.Creator.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Last name")]
             public string LastName { get; set; }
 
+            [DataType(DataType.Text)]
+            [Display(Name = "Display name")]
+            public string DisplayName { get; set; }
+
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
@@ -59,7 +63,8 @@ namespace PhotoBook.Creator.Areas.Identity.Pages.Account.Manage
             {
                 PhoneNumber = phoneNumber,
                 FirstName = user.FirstName,
-                LastName = user.LastName
+                LastName = user.LastName,
+                DisplayName = user.DisplayName
             };
         }
 
@@ -108,6 +113,11 @@ namespace PhotoBook.Creator.Areas.Identity.Pages.Account.Manage
             if (Input.LastName != user.LastName)
             {
                 user.LastName = Input.LastName;
+            }
+
+            if (Input.DisplayName != user.DisplayName)
+            {
+                user.DisplayName = Input.DisplayName;
             }
 
             await _userManager.UpdateAsync(user);

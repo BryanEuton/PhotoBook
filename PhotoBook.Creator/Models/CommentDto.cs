@@ -10,6 +10,7 @@ namespace PhotoBook.Creator.Models
     {
         public long Id { get; set; }
         public string Text { get; set; }
+        public string CreatedBy { get; set; }
         public long ThumbnailId { get; set; }
         public bool CanEdit { get; set; }
         public bool CanDelete { get; set; }

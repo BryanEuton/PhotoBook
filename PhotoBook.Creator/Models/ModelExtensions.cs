@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Common.IdentityManager.Models;
+using Microsoft.AspNetCore.Identity;
 using PhotoBook.DataManager.Models;
 
 namespace PhotoBook.Creator.Models
@@ -143,14 +146,15 @@ namespace PhotoBook.Creator.Models
             };
         }
 
-        public static CommentDto ToCommentDto(this Comment comment, string currentUser)
+        public static async Task<CommentDto> ToCommentDto(this Comment comment, UserManager<ApplicationUser> userManager, string currentUser)
         {
-
+            var createdBy = await userManager.FindByNameAsync(comment.CreatedBy);
             return new CommentDto
             {
                 Id = comment.Id,
                 ThumbnailId = comment.ThumbnailId,
                 Text = comment.Text,
+                CreatedBy = createdBy?.DisplayName ?? createdBy?.FullName,
                 CanEdit = comment.CreatedBy == currentUser,
                 CanDelete= comment.CreatedBy == currentUser
             };

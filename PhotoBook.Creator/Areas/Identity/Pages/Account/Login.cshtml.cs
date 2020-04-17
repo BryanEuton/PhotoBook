@@ -118,8 +118,7 @@ namespace PhotoBook.Creator.Areas.Identity.Pages.Account
             }
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim("FullName", user.FullName)
+                new Claim(ClaimTypes.NameIdentifier, user.UserName),
             };
 
             var claimsIdentity = new ClaimsIdentity(

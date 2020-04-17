@@ -23,6 +23,13 @@ namespace Common.IdentityManager.Models
         [PersonalData]
         public string LastName { get; set; }
 
+        /// <summary>
+        /// The user's desired display name.
+        /// </summary>
+        [MaxLength(80)]
+        [PersonalData]
+        public string DisplayName { get; set; }
+
         public bool IsAdmin { get; set; }
         public bool IsActive { get; set; }
 

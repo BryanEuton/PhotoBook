@@ -28,7 +28,7 @@ export class LoginMenu extends Component {
         console.log(JSON.stringify(user, null, 2));
         this.setState({
             isAuthenticated,
-            userName: user && user.fullName
+            userName: user && user.displayName
         });
     }
 

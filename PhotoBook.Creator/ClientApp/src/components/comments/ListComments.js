@@ -51,7 +51,7 @@ export const ListComments = props => {
         {
           displayedComments.map(c =>
             <div key={c.id} className="col-sm-12 comment">
-              <span>{c.text}</span>
+              <span>{c.text} {c.createdBy ? "- " + c.createdBy : null}</span>
               {c.canEdit ? <FontAwesomeIcon icon={faPencilAlt} onClick={e => setEditCommentId(c.id)} /> : null}
               {c.canDelete ? <FontAwesomeIcon icon={faTimes} onClick={e => setDeleteCommentId(c.id)} /> : null}
               {editCommentId !== c.id ? null : <CommentModal {...props} comment={c} onClose={handleCommentModalClosed} />}

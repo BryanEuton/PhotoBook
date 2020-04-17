@@ -2,16 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Migrations\20200214194558_v1.cs" />
-    <Compile Remove="Migrations\20200214194558_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200402140501_v2.cs" />
-    <Compile Remove="Migrations\20200402140501_v2.Designer.cs" />
-    <Compile Remove="Migrations\20200402194610_v3.cs" />
-    <Compile Remove="Migrations\20200402194610_v3.Designer.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="3.1.2" />

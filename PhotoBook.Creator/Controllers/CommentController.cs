@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Common.IdentityManager.Models;
+using Microsoft.AspNetCore.Identity;
 using PhotoBook.DataManager;
 using PhotoBook.Creator.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -13,34 +17,51 @@ namespace PhotoBook.Creator.Controllers
 {
     public class CommentController : BaseController
     {
-        
-        public CommentController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
-        {}
+        private readonly UserManager<ApplicationUser> _userManager;
+        public CommentController(IConfiguration iConfiguration, DataContext context,
+            UserManager<ApplicationUser> userManager) : base(iConfiguration, context)
+        {
+            _userManager = userManager;
+        }
 
         [HttpGet]
         [Route("api/Comment/Get")]
         [AjaxErrorHandler]
         // GET: Photos
-        public ContentResult Get(long thumbnailId)
+        public async Task<ContentResult> Get(long thumbnailId)
         {
-            var comments = Context.Comments.Where(c => c.ThumbnailId == thumbnailId).ToList();
-            return AjaxResult(comments.Select(c => c.ToCommentDto(GetUserName)).ToList());
+            var comments = Context.Comments.Where(c => c.ThumbnailId == thumbnailId)
+                .ToList();
+            var dto = new List<CommentDto>();
+            foreach (var comment in comments)
+            {
+                dto.Add(await comment.ToCommentDto(_userManager, GetUserName));
+            }
+            return AjaxResult(dto);
         }
 
         [HttpGet]
         [Route("api/Comment/Load")]
         [AjaxErrorHandler]
         // GET: Photos
-        public ContentResult Load(long[] ids)
+        public async Task<ContentResult> LoadAsync(long[] ids)
         {
-            var comments = Context.Comments.Where(t => ids.Contains(t.Id)).ToList();
-            return AjaxResult(comments.Select(c=> c.ToCommentDto(GetUserName)).ToList());
+            var comments = Context.Comments
+                .Where(t => ids.Contains(t.Id))
+                .ToList();
+
+            var dto = new List<CommentDto>();
+            foreach (var comment in comments)
+            {
+                dto.Add(await comment.ToCommentDto(_userManager, GetUserName));
+            }
+            return AjaxResult(dto);
         }
 
         [HttpPost]
         [Route("api/Comment/Create")]
         [AjaxErrorHandler]
-        public ContentResult Create(Comment comment)
+        public async Task<ContentResult> Create(Comment comment)
         {
             try
             {
@@ -60,8 +81,7 @@ namespace PhotoBook.Creator.Controllers
                 
                 Context.Comments.Add(comment);
                 Context.SaveChanges();
-
-                return AjaxResult(comment.ToCommentDto(GetUserName), $"Added comment: {comment.Text}");
+                return AjaxResult(await comment.ToCommentDto(_userManager, GetUserName), $"Added comment: {comment.Text}");
             }
             catch (Exception ex)
             {
@@ -104,7 +124,7 @@ namespace PhotoBook.Creator.Controllers
         [HttpPost]
         [Route("api/Comment/Update")]
         [AjaxErrorHandler]
-        public ContentResult Update(Comment comment)
+        public async Task<ContentResult> Update(Comment comment)
         {
             if (comment == null)
             {
@@ -136,7 +156,7 @@ namespace PhotoBook.Creator.Controllers
                     context.SaveChanges();
                 }
 
-                return AjaxResult(dbComment.ToCommentDto(GetUserName), $"Updated comment {comment.Id}");
+                return AjaxResult(await comment.ToCommentDto(_userManager, GetUserName), $"Updated comment {comment.Id}");
             }
             catch (Exception ex)
             {

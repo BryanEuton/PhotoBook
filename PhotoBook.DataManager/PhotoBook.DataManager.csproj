@@ -2,38 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Migrations\20190918170808_v1.cs" />
-    <Compile Remove="Migrations\20190918170808_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200211182950_v2.cs" />
-    <Compile Remove="Migrations\20200211182950_v2.Designer.cs" />
-    <Compile Remove="Migrations\20200211185030_v2.cs" />
-    <Compile Remove="Migrations\20200211185030_v2.Designer.cs" />
-    <Compile Remove="Migrations\20200214194955_v1.cs" />
-    <Compile Remove="Migrations\20200214194955_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200214205229_v1.cs" />
-    <Compile Remove="Migrations\20200214205229_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200214205305_v1.cs" />
-    <Compile Remove="Migrations\20200214205305_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200226190154_v1.cs" />
-    <Compile Remove="Migrations\20200226190154_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200306170626_v1.cs" />
-    <Compile Remove="Migrations\20200306170626_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200311191615_v1.cs" />
-    <Compile Remove="Migrations\20200311191615_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200312013308_v1.cs" />
-    <Compile Remove="Migrations\20200312013308_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200315030048_v1.cs" />
-    <Compile Remove="Migrations\20200315030048_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200315030650_v1.cs" />
-    <Compile Remove="Migrations\20200315030650_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200315051726_v1.cs" />
-    <Compile Remove="Migrations\20200315051726_v1.Designer.cs" />
-    <Compile Remove="Migrations\20200315143630_v1.cs" />
-    <Compile Remove="Migrations\20200315143630_v1.Designer.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="3.1.2" />

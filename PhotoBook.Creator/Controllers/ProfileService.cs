@@ -35,8 +35,8 @@ namespace PhotoBook.Creator.Controllers
 
              var claims = new List<Claim>
             {
-                new Claim("userName", user.UserName),
-                new Claim("fullName", user.FullName),
+                new Claim(ClaimTypes.NameIdentifier, user.UserName),
+                new Claim("displayName", user.DisplayName ?? user.FullName),
                 new Claim("isAdmin", user.IsAdmin.ToString()),
             };
 
