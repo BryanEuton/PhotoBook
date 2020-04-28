@@ -8,7 +8,7 @@ import { useSwipeable } from 'react-swipeable';
 import { faceService } from '../services';
 import { FaceImage } from '../FaceImage';
 import { Button, ButtonToolbar } from 'reactstrap';
-import { stopEvent, coordsChanged, getCoords } from '../../utils'
+import { stopEvent, coordsChanged, getCoords, isMobile } from '../../utils'
 import { TagDropdown } from '../tags/TagDropdown'
 Moment.globalLocale = "utc";
 
@@ -38,9 +38,16 @@ export const FaceSwiper = props => {
       down: { name: "Set Tag", fn: noop },
       right: { name: "Prev", fn: PrevTag}
     },
+    isValidSwipe = function(e)
+    {
+      if (saving || (isMobile() && e.event.target.tagName.toLowerCase() !== "img")) {
+        return false;
+      }
+      return true;
+    },
     handlers = useSwipeable({
-      onSwipedLeft: () => {
-        if (saving) {
+      onSwipedLeft: (e) => {
+        if (!isValidSwipe(e)) {
           return;
         }
         console.log("swiped left");
@@ -50,8 +57,8 @@ export const FaceSwiper = props => {
           NextTag();
         }
       },
-      onSwipedRight: () => {
-        if (saving) {
+      onSwipedRight: (e) => {
+        if (!isValidSwipe(e)) {
           return;
         }
         console.log("swiped right");
@@ -63,8 +70,8 @@ export const FaceSwiper = props => {
           PrevTag();
         }
       },
-      onSwipedUp: () => {
-        if (saving) {
+      onSwipedUp: (e) => {
+        if (!isValidSwipe(e)) {
           return;
         }
         console.log("swiped up");
@@ -74,8 +81,8 @@ export const FaceSwiper = props => {
           updateFaceTag(settings.up);
         }
       },
-      onSwipedDown: () => {
-        if (saving) {
+      onSwipedDown: (e) => {
+        if (!isValidSwipe(e)) {
           return;
         }
         console.log("swiped down");

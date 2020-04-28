@@ -16,4 +16,7 @@ function stopEvent(e) {
 function ignore() {
 
 }
-export { ignore, stopEvent };
+function isMobile() {
+  return document.body.clientWidth <= 768;
+}
+export { ignore, stopEvent, isMobile };

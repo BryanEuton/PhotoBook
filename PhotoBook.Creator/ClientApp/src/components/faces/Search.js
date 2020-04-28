@@ -170,10 +170,12 @@ export default class FaceSearch extends Component {
 
   render() {
     var results = null;
-    if (this.state.searchResults.numResults > 0) {
-      results = this.renderSearchResults();
-    } else if (this.state.searched) {
-      results = <div><p>No Results</p></div>
+    if (!this.state.searching) {
+      if (this.state.searchResults.numResults > 0) {
+        results = this.renderSearchResults();
+      } else if (this.state.searched) {
+        results = <div><p>No Results</p></div>
+      }
     }
     return (
       <div className="search">
