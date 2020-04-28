@@ -7394,6 +7394,10 @@ html {
   margin-left: 10px;
   color: #0366d6; }
 
+.modal .modal-body .dropdown-menu.show {
+  max-height: 500px;
+  overflow: auto; }
+
 .enlarged-modal img {
   max-width: 100%; }
 
