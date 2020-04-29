@@ -41,7 +41,9 @@ namespace PhotoBook.Creator.Areas.Identity.Pages.Account
             public string Email { get; set; }
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task OnGetAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             RegistrationAllowed = false;
             if (bool.TryParse(_configuration["Settings:AllowRegistrations"], out var registerAllowed) && registerAllowed)

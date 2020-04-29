@@ -281,6 +281,11 @@ export const FaceSwiper = props => {
       setNumResults(numResults + 1);
     }
   }
+  function handleValidateFace(face) {
+    if (face) {
+      updateFaceTag({ id: face.tagId });
+    }
+  }
   function PrevTag() {
     if (index > 0) {
       setIndex(index - 1);
@@ -341,6 +346,7 @@ export const FaceSwiper = props => {
     updated.calEnd = endDate;
     setCalendarSettings(updated);
   }
+
   if (fetching) {
     return (<p><em>Loading...</em></p>);
   }
@@ -397,7 +403,7 @@ export const FaceSwiper = props => {
             <div className="row middle">
               <div className="left col-sm-1">{<TagDropdown allowedTypes="Person" includeNoTag={!!settings.left} includeNoTagText="clear" rootTag={Button} onClick={tag => updateSetting('left', tag)} activeItems={[settings.left && settings.left.id]} text={settings.left ? settings.left.name : defaultSettings.left.name} />}</div>
               <div className="center col-sm-10" {...handlers}>
-                {face && !saving ? <FaceImage {...props} id={face.id} face={face} img={face.fakeImage} onFaceUpdate={handleUpdateFace} onFaceRemoved={handleRemoveFace} onFaceAdded={handleAddFace} displayFaceTags="true" showDetails={showFaceDetails} onShowDetails={() => setShowFaceDetails(!showFaceDetails)} /> : <p><em>Loading...</em></p>}
+                {face && !saving ? <FaceImage {...props} id={face.id} face={face} img={face.fakeImage} onFaceUpdate={handleUpdateFace} onFaceRemoved={handleRemoveFace} onFaceAdded={handleAddFace} displayFaceTags="true" showDetails={showFaceDetails} onShowDetails={() => setShowFaceDetails(!showFaceDetails)} onValidateFaceTag={() => handleValidateFace(face)} /> : <p><em>Loading...</em></p>}
                 {saving ? <p><i>Saving</i></p> : null}
               </div>
               <div className="right col-sm-1">{<TagDropdown allowedTypes="Person" includeNoTag={!!settings.right} includeNoTagText="clear" rootTag={Button} onClick={tag => updateSetting('right', tag)} activeItems={[settings.right && settings.right.id]} text={settings.right ? settings.right.name : defaultSettings.right.name} />}</div>

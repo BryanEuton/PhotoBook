@@ -29,6 +29,10 @@ export class FaceImage extends Component {
     this.setState({ tags: state.tags.filter(tag=> tag.type === "Person") });
   }
   validateFaceTag(face) {
+    if (this.props.onValidateFaceTag) {
+      this.props.onValidateFaceTag();
+      return;
+    }
     if (this.faceOp) {
       return;
     }
