@@ -18,7 +18,7 @@ namespace PhotoBook.Creator.Models
         public List<long> PhotoBooks { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public List<FaceDto> Faces { get; set; }
+        public List<long> Faces { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
         public long? LocationId { get; set; }

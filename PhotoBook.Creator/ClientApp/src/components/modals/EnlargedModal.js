@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { photoService } from '../services';
 import { stopEvent } from '../../utils';
 
 export class EnlargedModal extends Component {

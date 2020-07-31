@@ -8,7 +8,11 @@ export const AuthenticatedRoute = function (props) {
     Component = props.component;
 
   useEffect(() => {
+    let ignore = false;
     async function handleUpdate(state) {
+      if (ignore) {
+        return;
+      }
       const authenticated = await authService.isAuthenticated();
       console.log('received update', state, authenticated);
       if (authenticated !== isAuthenticated) {
@@ -20,6 +24,7 @@ export const AuthenticatedRoute = function (props) {
     handleUpdate();
 
     return /* clean up */() => {
+      ignore = true;
       console.log('unsubscribing to auth!');
       authService.unsubscribe(subscription);
     };

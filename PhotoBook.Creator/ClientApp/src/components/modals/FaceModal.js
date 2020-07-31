@@ -3,7 +3,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Dropdown, DropdownT
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { tagStore } from '../stores';
-import { faceService, photoService } from '../services';
+import { faceService } from '../services';
 import { ImageMap } from '../behaviors';
 import { coordsChanged, faceChange, getCoords} from '../../utils'
 import $ from 'jquery';

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { locationStore, tagStore } from '../stores';
+import React, { useEffect, useState } from 'react';
+import { locationStore, tagStore, faceStore } from '../stores';
 import { searchService } from '../services';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { PagedResultsForm } from '../paged-results/PagedResultsForm';
@@ -8,208 +8,241 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { Image } from '../Image';
 
-export default class Search extends Component {
-  constructor(props) {
-    super(props);
-
-    this.subscriptions = [];
-    this.state = {
-      pageSize: 50,
-      page: 1,
-      searching: false,
-      displayAllFaces: false,
-      filters: [],
-      states: [],
-      cities: [],
-      locations: [],
-      tags: [],
-      searchResults: { numResults: 0 },
-      numColumnsClass: "three-col"
-    };
-
-  }
-  componentDidMount() {
-    this.subscriptions.push(tagStore.subscribe(state => this.handleTagStoreChange(state)));
-    this.subscriptions.push(locationStore.subscribe(state => this.handleLocationStoreChange(state)));
-  }
-  componentWillUnmount() {
-    if (this.subscriptions !== null) {
-      this.subscriptions.map(s => s());
+export const Search = props => {
+  const [pageSize, setPageSize] = useState(50),
+    [citiesDropdownOpen, setCitiesDropdownOpen] = useState(false),
+    [locationsDropdownOpen, setLocationsDropdownOpen] = useState(false),
+    [statesDropdownOpen, setStatesDropdownOpen] = useState(false),
+    [searched, setSearched] = useState(false),
+    [searching, setSearching] = useState(false),
+    [displayAllFaces, setDisplayAllFaces] = useState(false),
+    [filters, setFilters] = useState([]),
+    [states, setStates] = useState([]),
+    [cities, setCities] = useState([]),
+    [locations, setLocations] = useState([]),
+    [tags, setTags] = useState([]),
+    [searchResults, setSearchResults] = useState({ numResults: 0 }),
+    [searchParams, setSearchParams] = useState({ }),
+    [numColumnsClass, setNumColuumnsClass] = useState('three-col'),
+    [locationStoreVersion, setLocationStoreVersion] = useState(0),
+    [tagStoreVersion, setTagStoreVersion] = useState(0);
+  
+  useEffect(() => {
+    let ignore = false;
+    function handleLocationStoreChange(state, v) {
+      if (ignore) {
+        return;
+      }
+      setLocationStoreVersion(v);
+      setStates(state.states.map(s => {
+        if (filters.find(f => f.id === s.id && f.type === s.type)) {
+          s.active = true;
+        }
+        return s;
+      }));
+      setCities(state.cities.map(s => {
+        if (filters.find(f => f.id === s.id && f.type === s.type)) {
+          s.active = true;
+        }
+        return s;
+      }));
+      setLocations(state.locations.map(s => {
+        if (filters.find(f => f.id === s.id && f.type === s.type)) {
+          s.active = true;
+        }
+        return s;
+      }));
     }
-    this.subscriptions.length = 0;
-  }
-  handleLocationStoreChange(state) {
-    const states = state.states.map(s => {
-      if (this.state.filters.find(f => f.id === s.id && f.type === s.type)) {
-        s.active = true;
+    function handleTagStoreChange(state, v) {
+      if (ignore) {
+        return;
       }
-      return s;
-    }),
-    cities = state.cities.map(s => {
-      if (this.state.filters.find(f => f.id === s.id && f.type === s.type)) {
-        s.active = true;
-      }
-      return s;
-    }),
-    locations = state.locations.map(s => {
-      if (this.state.filters.find(f => f.id === s.id && f.type === s.type)) {
-        s.active = true;
-      }
-      return s;
-    });
-    this.setState({ states, cities, locations });
-  }
-  handleTagStoreChange(state) {
-    this.setState({
-      tags: state.tags,
-      tagTypes: state.types.map(tagType => { return { id: tagType, name: tagType, type: 'tagType'}; })
-    });
-  }
-  handlePageChange(pageNumber) {
-    if (this.state.searched && this.searchParams && !this.state.searching) {
-      const params = Object.assign({}, this.searchParams);
+      setTagStoreVersion(v);
+      setTags(state.tags);
+    }
+
+    const subscriptions = [tagStore.subscribe(tagStoreVersion, handleTagStoreChange),
+      locationStore.subscribe(locationStoreVersion, handleLocationStoreChange)];
+
+    return () => {
+      ignore = true;
+      subscriptions.map(s => {
+        if (typeof s === "function") {
+          s();
+        }
+        return null;
+      });
+    }
+  }, [filters, locationStoreVersion, tagStoreVersion]);
+
+  function handlePageChange(pageNumber) {
+    if (searched && searchParams && !searching) {
+      const params = Object.assign({}, searchParams);
       params.page = pageNumber;
-      params.pageSize = this.state.pageSize;
-      this.handleSearch(params);
+      params.pageSize = pageSize;
+      handleSearch(params);
     }
   }
 
-  handleSearch(params) {
-    if (!this.state.searching) {
-      params.states = this.state.filters.filter(t => t.type === 'state' && t.active).map(t => t.id);
-      params.cities = this.state.filters.filter(t => t.type === 'city' && t.active).map(t => t.name);
-      params.locations = this.state.filters.filter(t => t.type === 'location' && t.active).map(t => t.id);
+  function handleSearch(params) {
+    if (!searching) {
+      params.states = filters.filter(t => t.type === 'state' && t.active).map(t => t.id);
+      params.cities = filters.filter(t => t.type === 'city' && t.active).map(t => t.name);
+      params.locations = filters.filter(t => t.type === 'location' && t.active).map(t => t.id);
 
-      this.searchParams = params;
       let searchParams = Object.assign({}, params);
       delete searchParams.page;
       delete searchParams.pageSize;
-      const terms = JSON.stringify(searchParams);
-      this.terms = terms;
-      searchParams.page = params.page;
-      searchParams.pageSize = params.pageSize || this.state.pageSize;
 
-      this.searchParams = searchParams;
-      this.setState({ searching: true });
+      setSearchParams(searchParams);
+      searchParams.page = params.page;
+      searchParams.pageSize = params.pageSize || pageSize;
+
+      setSearching(true);
       searchService.search(searchParams).then(data => {
-        if (data && this.terms === terms) {
+        if (data) {
           //same search result
-          this.setState({ searchResults: { page: searchParams.page, pageSize: searchParams.pageSize, numResults: data.totalResults, pagedResults: data.results }, searched: true, searching: false });
+          setSearchResults({
+            page: searchParams.page,
+            pageSize: searchParams.pageSize,
+            numResults: data.totalResults,
+            pagedResults: data.results
+          });
+          setSearched(true);
+          setSearching(false);
         }
       });
     }
   }
-  handleFilterChange(type, value) {
+  function handleFilterChange(type, value) {
     if (type === 'pagesize') {
-      this.setState({ pageSize: value, page: 1 });
-      if (this.state.searched && !this.state.searching && this.searchParams) {
-        this.searchParams.page = 1;
-        this.searchParams.pageSize = value;
+      setPageSize(value);
+      if (searched && !searching && searchParams) {
+        var updatedParams = searchParams;
+        updatedParams.page = 1;
+        updatedParams.pageSize = value;
 
-        this.handleSearch(this.searchParams);
+        handleSearch(updatedParams);
       }
       return;
     } else if (type === 'columnsize') {
-      this.setState({ numColumnsClass: value });
+      setNumColuumnsClass(value);
       return;
     } else if (type === 'location') {
       value.name = value.formatted;
     }
     value.filterType = type;
 
-    var filters = this.state.filters;
+    let updated = [...filters],
+      existing = updated.find(f => f.id === value.id && (f.type === type || f.type === value.type));
+
     value.active = !value.active;
     if (value.active) {
-      filters.push(value);
+      if (existing) {
+        existing.active = value.active;
+      } else {
+        updated.push(value);
+      }
     } else {
-      filters = filters.filter(f => !(f.id === value.id && (f.type === type || f.type === value.type)));
+      updated = updated.filter(f => !(f.id === value.id && (f.type === type || f.type === value.type)));
     }
-    this.setState({ filters: filters });
-  }
-  handleRemoveFilter(filter) {
-    var filters = this.state.filters.filter(f => !(f.id === filter.id && f.type === filter.type));
-    this.setState({ filters: filters });
-    if (filter.type === 'state') {
-      const states = this.state.states,
-        s = states.find(s => s.id === filter.id);
-      s.active = false;
-      this.setState({ states });
-    } else if (filter.type === 'city') {
-      const cities = this.state.cities,
-        c = cities.find(c => c.id === filter.id);
-      c.active = false;
-      this.setState({ cities });
-    } else if (filter.type === 'location') {
-      const locations = this.state.locations,
-        location = locations.find(location => location.id === filter.id);
-      location.active = false;
-      this.setState({ locations });
-    }
-  }
 
-  renderSearchResults() {
+    setFilters(updated);
+  }
+  function handleRemoveFilter(filter) {
+    let updated = [...filters].filter(f => !(f.id === filter.id && f.type === filter.type));
+    setFilters(updated);
+    if (filter.type === 'state') {
+      const updatedStates = states,
+        s = updatedStates.find(s => s.id === filter.id);
+      s.active = false;
+      setStates(updatedStates);
+    } else if (filter.type === 'city') {
+      const updatedCities = cities,
+        c = updatedCities.find(c => c.id === filter.id);
+      c.active = false;
+      setCities(updatedCities);
+    } else if (filter.type === 'location') {
+      const updatedLocations = locations,
+        location = updatedLocations.find(location => location.id === filter.id);
+      location.active = false;
+      setLocations(updatedLocations);
+    } else {
+      filter.active = false;
+    }
+  }
+  function toggleDisplayAllFaces() {
+    const update = !displayAllFaces;
+    if (update && searched && !searching) {
+      searchResults.pagedResults.map(img => {
+        faceStore.prefetch(img.id);
+        return null;
+      });
+    }
+    setDisplayAllFaces(update);
+  }
+  function renderSearchResults() {
     return (
-      <PagedResults {...this.props} pagedResults={this.state.searchResults} handlePageChange={pageNumber => this.handlePageChange(pageNumber)} numColumnsClass={this.state.numColumnsClass}>
+      <PagedResults {...props} pagedResults={searchResults} handlePageChange={pageNumber => handlePageChange(pageNumber)} numColumnsClass={numColumnsClass}>
         {
-          this.state.searchResults.pagedResults.map(img =>
-            <Image {...this.props} key={img.id} id={img.id} locationId={img.locationId} img={img} displayAllFaces={this.state.displayAllFaces} toggleDisplayAllFaces={() => this.setState({ displayAllFaces: !this.state.displayAllFaces })} tags={this.state.tags} locations={this.state.locations} />
+          searchResults.pagedResults.map(img =>
+            <Image {...props} key={img.id} id={img.id} locationId={img.locationId} img={img} displayAllFaces={displayAllFaces} toggleDisplayAllFaces={toggleDisplayAllFaces} tags={tags} locations={locations} />
           )
         }
       </PagedResults>
     );
   }
-  render() {
-    var results = null;
-    if (!this.state.searching) {
-      if (this.state.searchResults.numResults > 0) {
-        results = this.renderSearchResults();
-      } else if (this.state.searched) {
-        results = <div><p>No Results</p></div>
-      }
+  
+  var results = null;
+  if (!searching) {
+    if (searchResults.numResults > 0) {
+      results = renderSearchResults();
+    } else if (searched) {
+      results = <div><p>No Results</p></div>
     }
-
-    return (
-      <div className="search">
-        <PagedResultsForm {...this.props} submitText={this.state.searching ? 'Searching...' : 'Search'} submit={params => this.handleSearch(params)} handleFilterChange={(type, value) => this.handleFilterChange(type, value)} handleRemoveFilter={filter => this.handleRemoveFilter(filter)} numColumnsClass={this.state.numColumnsClass} filters={this.state.filters} pageSize={this.state.pageSize} displayCalendar={true} includeNoTag="true">
-          <Dropdown isOpen={this.state.statesDropdown} toggle={e => this.setState({ statesDropdown: !this.state.statesDropdown })}>
-            <DropdownToggle variant="success">States</DropdownToggle>
-            <DropdownMenu>
-              {
-                this.state.states.map(state =>
-                  <DropdownItem key={state.id} onClick={e => this.handleFilterChange('state', state)}>
-                    {state.name} {state.active ? <FontAwesomeIcon icon={faCheck} /> : null}
-                  </DropdownItem>
-                )
-              }
-            </DropdownMenu>
-          </Dropdown>
-          <Dropdown isOpen={this.state.citiesDropdown} toggle={e => this.setState({ citiesDropdown: !this.state.citiesDropdown })}>
-            <DropdownToggle variant="success">Cities</DropdownToggle>
-            <DropdownMenu>
-              {
-                this.state.cities.map(city =>
-                  <DropdownItem key={city.id} onClick={e => this.handleFilterChange('city', city)}>
-                    {city.name} {city.active ? <FontAwesomeIcon icon={faCheck} /> : null}
-                  </DropdownItem>
-                )
-              }
-            </DropdownMenu>
-          </Dropdown>
-          <Dropdown isOpen={this.state.locationsDropdown} toggle={e => this.setState({ locationsDropdown: !this.state.locationsDropdown })}>
-            <DropdownToggle variant="success">Locations</DropdownToggle>
-            <DropdownMenu>
-              {
-                this.state.locations.map(location =>
-                  <DropdownItem key={location.id} onClick={e => this.handleFilterChange('location', location)}>
-                    {location.dropdownFormatted} {location.active ? <FontAwesomeIcon icon={faCheck} /> : null}
-                  </DropdownItem>
-                )
-              }
-            </DropdownMenu>
-          </Dropdown>
-        </PagedResultsForm>
-        {results}
-      </div>
-    );
   }
+  
+  return (
+    <div className="search">
+      <PagedResultsForm {...props} submitText={searching ? 'Searching...' : 'Search'} submit={params => handleSearch(params)} handleFilterChange={(type, value) => handleFilterChange(type, value)} handleRemoveFilter={filter => handleRemoveFilter(filter)} numColumnsClass={numColumnsClass} filters={filters} pageSize={pageSize} displayCalendar={true} includeNoTag="true">
+        <Dropdown isOpen={statesDropdownOpen} toggle={e => setStatesDropdownOpen(!statesDropdownOpen)}>
+          <DropdownToggle variant="success">States</DropdownToggle>
+          <DropdownMenu>
+            {
+              states.map(state =>
+                <DropdownItem key={state.id} onClick={e => handleFilterChange('state', state)}>
+                  {state.name} {state.active ? <FontAwesomeIcon icon={faCheck} /> : null}
+                </DropdownItem>
+              )
+            }
+          </DropdownMenu>
+        </Dropdown>
+        <Dropdown isOpen={citiesDropdownOpen} toggle={e => setCitiesDropdownOpen(!citiesDropdownOpen)}>
+          <DropdownToggle variant="success">Cities</DropdownToggle>
+          <DropdownMenu>
+            {
+              cities.map(city =>
+                <DropdownItem key={city.id} onClick={e => handleFilterChange('city', city)}>
+                  {city.name} {city.active ? <FontAwesomeIcon icon={faCheck} /> : null}
+                </DropdownItem>
+              )
+            }
+          </DropdownMenu>
+        </Dropdown>
+        <Dropdown isOpen={locationsDropdownOpen} toggle={e => setLocationsDropdownOpen(!locationsDropdownOpen)}>
+          <DropdownToggle variant="success">Locations</DropdownToggle>
+          <DropdownMenu>
+            {
+              locations.map(location =>
+                <DropdownItem key={location.id} onClick={e => handleFilterChange('location', location)}>
+                  {location.dropdownFormatted} {location.active ? <FontAwesomeIcon icon={faCheck} /> : null}
+                </DropdownItem>
+              )
+            }
+          </DropdownMenu>
+        </Dropdown>
+      </PagedResultsForm>
+      {results}
+    </div>
+  );
 }

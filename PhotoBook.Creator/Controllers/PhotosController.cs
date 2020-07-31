@@ -26,7 +26,7 @@ namespace PhotoBook.Creator.Controllers
             var thumbnail = Context.Thumbnails
                 .Include(t => t.Comments)
                 .Include(t => t.PhotoBooks)
-                .Include(t => t.Faces).ThenInclude(tt => tt.Tag)
+                .Include(t => t.Faces)
                 .Include(t => t.TagThumbnails)
                 .ThenInclude(tt => tt.Tag)
                 .ThenInclude(tag => tag.TagType)

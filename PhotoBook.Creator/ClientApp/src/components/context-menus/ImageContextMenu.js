@@ -52,6 +52,10 @@ export class ImageContextMenu extends Component {
       update = true;
       changes.displayFaces = props.displayFaces;
     }
+    if (props.img.v !== state.img.v) {
+      update = true;
+      changes.img = props.img;
+    }
     if (imageDetailsChanged(props.imgDetails, state.imgDetails)) {
       update = true;
       changes.imgDetails = props.imgDetails;
@@ -509,15 +513,12 @@ export class ImageContextMenu extends Component {
   }
   render() {
     const results = [],
-      displayedFaces = this.state.displayFaces || this.state.displayAllFaces ? this.state.img.faces : this.state.img.faces.filter(f => f.display);
+      wrappedItems = [],
+      displayedFaces = this.state.displayFaces || this.state.displayAllFaces ? this.state.img.faces : [];
     if (displayedFaces.length) {
-      this.state.img.faces.map(face => {
-        //results.push(<div key={face.id} className="face-map" style={{ top: face.y, left: face.x, width: face.width, height: face.height }}></div>);
-        results.push(
-          <FaceContextMenu {...this.props} key={`face-${face.id}`} img= { this.state.img } face={face} imgDetails={this.state.imgDetails} ></FaceContextMenu>
-        );
-        return null;
-      });
+      wrappedItems.push(displayedFaces.map(faceId =>
+        <FaceContextMenu {...this.props} key={`face-${faceId}`} img={this.state.img} id={faceId} imageId={this.props.id} imgDetails={this.state.imgDetails} boundsRect={{ x: 0, y: 0, width: this.state.imgDetails.width, height: this.state.imgDetails.height }} bounds={this.faceWrapper}></FaceContextMenu>
+      ));
     }
     if (this.state.openNewLocation) {
       const place = this.state.locations.find(l => l.id === this.state.img.locationId);
@@ -527,10 +528,14 @@ export class ImageContextMenu extends Component {
     } else if (this.state.enlarge) {
       results.push(<EnlargedModal key='enlarged-modal' id={this.props.id} img={this.state.img} onClose={e => this.enlargeClosed(e)} ></EnlargedModal>);
     }
-    results.push(<ContextMenu key={"context-menu"} id={this.props.id} isOpen={this.state.openContextMenu} getMenu={this.renderMenu} onOpen={this.getMenuItems} updateCoords={(top, left) => this.setState({ top: top, left: left })} closeMenu={e => this.setState({openContextMenu: false})}>
+    wrappedItems.push(<ContextMenu key={"context-menu"} id={this.props.id} isOpen={this.state.openContextMenu} getMenu={this.renderMenu} onOpen={this.getMenuItems} updateCoords={(top, left) => this.setState({ top: top, left: left })} closeMenu={e => this.setState({openContextMenu: false})}>
       {this.props.children}
     </ContextMenu>
     );
+
+    results.push(<div key="face-wrapper" className='wrapper' ref={w => { this.faceWrapper = w; }} >
+    {wrappedItems}
+    </div>);
     return results;
   }
 }
