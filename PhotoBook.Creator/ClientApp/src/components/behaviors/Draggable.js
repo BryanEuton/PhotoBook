@@ -100,6 +100,8 @@ export class Draggable extends Component {
         y: mousePos.y - rel.y
       };
     const bounds = this.props.bounds;
+    console.log("Draggable.OnMouseMove", bounds);
+
     if (newPos.x < bounds.x) {
       newPos.x = bounds.x;
     } else if (newPos.x >= bounds.x + bounds.width) {

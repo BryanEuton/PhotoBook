@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
-import Search  from './components/search/Search';
+import { Search }  from './components/search/Search';
 import Faces from './components/faces/Search';
 import { FaceSwiper } from './components/faces/Swiper';
 import { TagEditor } from './components/tags/Editor';
@@ -56,12 +56,12 @@ axios.interceptors.response.use(response => { // intercept the global error
       const fromQuery = params.get(QueryParameterNames.ReturnUrl);
       if (fromQuery && !fromQuery.startsWith(`${window.location.origin}/`)) {
         // This is an extra check to prevent open redirects.
-        throw new Error("Invalid return url. The return url needs to have the same origin as the current page.")
+        throw new Error("Invalid return url. The return url needs to have the same origin as the current page.");
       }
       return fromQuery || `${window.location.origin}/`;
     }
 
-    if (error.response.status === 401 && window.location.href.indexOf('/authentication/') === -1 && window.location.href.indexOf('/account/') === -1) {
+    if (typeof error !== 'undefined' && error !== null && error.response.status === 401 && window.location.href.indexOf('/authentication/') === -1 && window.location.href.indexOf('/account/') === -1) {
       sessionStorage.clear();
       window.location.replace(getReturnUrl());
     }

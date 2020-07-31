@@ -68,13 +68,13 @@ namespace PhotoBook.Creator.Controllers
                 return _photosLocation;
             }
         }
-        protected ContentResult AjaxResult<T>(T obj, string message = null)
+        protected ContentResult AjaxResult<T>(T obj, string message = null, T undoArgs = default(T), string undoUrl = null)
         {
-            return Content(JsonConvert.SerializeObject(new JsonResponse<T>(true, obj, message)), "application/json");
+            return Content(JsonConvert.SerializeObject(new JsonResponse<T>(true, obj, undoUrl, undoArgs, message)), "application/json");
         }
         protected ContentResult AjaxFailedResult(string message)
         {
-            return Content(JsonConvert.SerializeObject(new JsonResponse<string>(false, null, message)), "application/json");
+            return Content(JsonConvert.SerializeObject(new JsonResponse<string>(false, null, null, null, message)), "application/json");
         }
         protected ContentResult AjaxResult<T>(T obj, int totalResults, string message = null)
         {

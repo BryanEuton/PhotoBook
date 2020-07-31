@@ -25,12 +25,12 @@ function imageDetailsChanged(a, b) {
   if (a && b &&
   (
     a.ready !== b.ready ||
-      a.width !== b.width ||
-      a.height !== b.height ||
-      a.position.top !== b.position.top ||
-      a.position.left !== b.position.left ||
-      a.diffWidth !== b.diffWidth ||
-      a.diffHeight !== b.diffHeight
+    a.width !== b.width ||
+    a.height !== b.height ||
+    a.position.top !== b.position.top ||
+    a.position.left !== b.position.left ||
+    a.diffWidth !== b.diffWidth ||
+    a.diffHeight !== b.diffHeight 
   )) {
     return true;
   }

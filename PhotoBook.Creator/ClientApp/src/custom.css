@@ -7290,8 +7290,8 @@ html {
 .comment .fa-pencil {
   color: yellow; }
 
-.image-comments a {
-  cursor: pointer; }
+.image-comments button {
+  margin-top: 10px; }
 
 .context-menu {
   position: absolute;
@@ -7342,6 +7342,8 @@ html {
     .image-holder svg.loading, .face-image svg.loading {
       display: block;
       margin: 0 auto; }
+  .image-holder .wrapper, .face-image .wrapper {
+    /*position: absolute;*/ }
   .image-holder .face-map, .face-image .face-map {
     position: absolute;
     top: 0;

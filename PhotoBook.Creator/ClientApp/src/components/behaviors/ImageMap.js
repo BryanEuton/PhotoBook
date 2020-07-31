@@ -8,11 +8,13 @@ export class ImageMap extends Component {
     super(props);
     let coords = Object.assign({ x: 0, y: 0, height: 1, width: 1 }, this.props.pos);
     this.calculateCoords = this.calculateCoords.bind(this);
+    this.dragElement = null;
     this.state = {
       draggable: typeof this.props.draggable !== 'undefined' ? this.props.draggable : true,
       resizable: typeof this.props.resizable !== 'undefined' ? this.props.resizable : true,
       ready: false,
       imgDetails: this.props.imgDetails,
+      resizerDirection: "bottomRight",
       wrapper: { x: 0, y: 0, width: 0, height: 0 },
       coords: coords,
       pos: { x: coords.x, y: coords.y, height: coords.height, width: coords.width },
@@ -100,6 +102,7 @@ export class ImageMap extends Component {
     }
     let coords = this.state.coords;
 
+    
     let wrapper = {
       x: image.position.left,
       y: image.position.top,
@@ -107,14 +110,12 @@ export class ImageMap extends Component {
       height: image.height
     };
     if (coordsChanged(this.state.wrapper, wrapper)) {
-      console.log("map updated wrapper", wrapper);
       this.setState({ wrapper: wrapper });
     }
-
+    
     let pos = this.getPosition(coords, image);
 
     if (coordsChanged(pos, this.state.pos)) {
-      console.log("map updated pos", pos);
       this.setState({ pos: pos });
       if (this.resizable &&
         (pos.width !== this.state.pos.width ||
@@ -124,34 +125,90 @@ export class ImageMap extends Component {
     }
   }
 
+  onResize = (e, direction, refToElement, delta) => {
+    let { pos, origPos, wrapper } = this.state;
+    if (typeof origPos === 'undefined' || origPos === null) {
+      return;
+    }
+    if (direction !== this.state.resizerDirection) {
+      this.setState({ resizerDirection: direction });
+    }
+    if (direction === "left" || direction === "topLeft") {
+      pos.x = origPos.x - delta.width;
+      if (pos.x < wrapper.x) {
+        pos.x = wrapper.x;
+      }
+    } else {
+      pos.width = origPos.width + delta.width;
+      if (pos.x + pos.width > wrapper.x + wrapper.width) {
+        pos.width = wrapper.x + wrapper.width - pos.x;
+      }
+      if (pos.width < 10) {
+        return;
+      }
+    }
+    if (direction === "top" || direction === "topLeft") {
+      pos.y = origPos.y - delta.height;
+      if (pos.y < wrapper.y) {
+        pos.y = wrapper.y;
+      }
+      //if (delta.height + pos.height < 10) {
+      //  return;
+      //}
+    } else {
+      pos.height = origPos.height + delta.height;
+      
+      if (pos.y + pos.height > wrapper.y + wrapper.height) {
+        pos.height = wrapper.y + wrapper.height - pos.y;
+      }
+      if (pos.height < 10) {
+        return;
+      }
+    }
+
+    if (coordsChanged(pos, origPos)) {
+      this.setState({ pos: pos });
+    }
+  }
   onResizeStart = (e, direction, refToElement) => {
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
-    this.setState({ draggable: false, prevDraggable: this.state.draggable });
+    this.setState({ draggable: false, prevDraggable: this.state.draggable, origPos: { x:  this.state.pos.x, y: this.state.pos.y, height: this.state.pos.height, width: this.state.pos.width } });
   }
   onResizeStop = (e, direction, refToElement, delta) => {
     let { pos } = this.state;
-    if (direction === "left" || direction === "topLeft") {
-      pos.x = pos.x - delta.width;
-      if (pos.x - this.state.wrapper.x< 0) {
-        pos.width = pos.width + pos.x - this.state.wrapper.x;
-        pos.x = this.state.wrapper.x;
-      }
-    } else {
-      pos.width = pos.width + delta.width;
-    }
-    if (direction === "top" || direction === "topLeft") {
-      pos.y = pos.y - delta.height;
-      if (pos.y - this.state.wrapper.y < 0) {
-        pos.height = pos.height + pos.y - this.state.wrapper.y;
-        pos.y = this.state.wrapper.y;
-      }
-    } else {
-      pos.height = pos.height + delta.height;
-    }
-    
-    this.setState({ pos: pos, draggable: this.state.prevDraggable });
-    console.log("New Resize pos: ", pos);
+    //if (direction === "left" || direction === "topLeft") {
+    //  pos.x = pos.x - delta.width;
+    //  if (pos.x - this.state.wrapper.x< 0) {
+    //    pos.width = pos.width + pos.x - this.state.wrapper.x;
+    //    pos.x = this.state.wrapper.x;
+    //  }
+    //} else {
+    //  pos.width = pos.width + delta.width;
+    //}
+    //if (direction === "top" || direction === "topLeft") {
+    //  pos.y = pos.y - delta.height;
+    //  if (pos.y - this.state.wrapper.y < 0) {
+    //    pos.height = pos.height + pos.y - this.state.wrapper.y;
+    //    pos.y = this.state.wrapper.y;
+    //  }
+    //} else {
+    //  pos.height = pos.height + delta.height;
+    //}
+
+    //if (pos.width <= 0) {
+    //  pos.width = 10;
+    //}
+    //if (this.state.wrapper.width - pos.x + this.state.wrapper.x < 0) {
+    //  pos.x = this.state.wrapper.width - pos.width;
+    //}
+    //if (pos.height <= 0) {
+    //  pos.height = 10;
+    //}
+    //if (this.state.wrapper.height - pos.y + this.state.wrapper.y < 0) {
+    //  pos.y = this.state.wrapper.height - pos.height;
+    //}
+    this.setState({ pos: pos, draggable: this.state.prevDraggable, origPos: null });
     this.update(pos);
   }
   onDragStop = (coords) => {
@@ -160,7 +217,6 @@ export class ImageMap extends Component {
       pos.x = coords.x;
       pos.y = coords.y;
       this.setState({ pos: pos });
-      console.log("New Drag pos: ", pos);
       this.update(pos);
     }
   }
@@ -178,7 +234,7 @@ export class ImageMap extends Component {
       };
 
       if (coordsChanged(coords, this.state.coords)) {
-        console.log("map updated coords", coords);
+        console.log("map updated coords", coords, this.state.wrapper, image);
         this.setState({ coords });
         this.props.onUpdate(coords);
       }
@@ -191,64 +247,39 @@ export class ImageMap extends Component {
       width: this.state.wrapper.width - this.state.pos.width,
       height: this.state.wrapper.height - this.state.pos.height
     },
+      maxWidth= this.state.wrapper.width - this.state.pos.x + this.state.wrapper.x,
       maxHeight = this.state.wrapper.height - this.state.pos.y + this.state.wrapper.y,
-      maxWidth = this.state.wrapper.width - this.state.pos.x + this.state.wrapper.x;
-    
-    //let results = React.Children.map(this.props.children, child =>
-    //  React.cloneElement(child, { ref: img => (this._img = img) })) || [];
+      widthRemaining = typeof this.state.origPos !== 'undefined' && this.state.origPos && (this.state.resizerDirection === "topLeft" || this.state.resizerDirection === "left") ? this.state.origPos.x + this.state.pos.width : maxWidth,
+      heightRemaining = typeof this.state.origPos !== 'undefined' && this.state.origPos && (this.state.resizerDirection === "topLeft" || this.state.resizerDirection === "top") ? this.state.origPos.y + this.state.pos.height : maxHeight;
     let results = React.Children.map(this.props.children, child =>
       React.cloneElement(child)) || [];
     if (this.state.ready) {
       results.unshift(<Draggable key="draggable" className="img-map-wrapper" pos={{ x: this.state.pos.x, y: this.state.pos.y }} onDragStop={this.onDragStop} bounds={bounds} draggable={this.state.draggable} title={this.props.title}>
-        <div className="inner-wrapper">
-          <Resizable
-            key="resizable"
-            enable={{ top: this.state.resizable, right: this.state.resizable, bottom: this.state.resizable, left: this.state.resizable, topRight: this.state.resizable, bottomRight: this.state.resizable, bottomLeft: this.state.resizable, topLeft: this.state.resizable }}
-            className="resizable"
-            ref={c => { this.resizable = c; }}
-            onResizeStart={this.onResizeStart}
-            onResizeStop={this.onResizeStop}
-            maxHeight={maxHeight}
-            maxWidth={maxWidth}
-            defaultSize={{
-              width: this.state.pos.width,
-              height: this.state.pos.height
-            }}
-          ><div className="div-map">&nbsp;</div></Resizable>
-        </div>
-      </Draggable>);
+            <div className="inner-wrapper">
+              <Resizable
+                key="resizable"
+                enable={{ top: this.state.resizable, right: this.state.resizable, bottom: this.state.resizable, left: this.state.resizable, topRight: this.state.resizable, bottomRight: this.state.resizable, bottomLeft: this.state.resizable, topLeft: this.state.resizable }}
+                className="resizable"
+                ref={c => { this.resizable = c; }}
+                bounds={this.props.bounds}
+                minWidth={10}
+                minHeight={10}
+                maxWidth={widthRemaining}
+                maxHeight={heightRemaining}      
+                onResizeStart={this.onResizeStart}
+                onResizeStop={this.onResizeStop}
+                onResize={this.onResize}
+                defaultSize={{
+                  width: this.state.pos.width,
+                  height: this.state.pos.height
+                }}
+              ><div className="div-map">&nbsp;</div></Resizable>
+            </div>
+          </Draggable>);
+    } else
+    {
+      results.push(<p key='notready'>Not ready</p>);
     }
-    /*
-      results.unshift(
-          <div key="wrapper" className="img-map-wrapper" style={{ top: this.state.wrapper.y, left: this.state.wrapper.x, width: this.state.wrapper.width, height: this.state.wrapper.height}}>
-              {!this.state.ready ? null : <Draggable key="draggable" pos={{ x: this.state.pos.x, y: this.state.pos.y }} onStop={this.onDragStop} bounds={bounds} disabled={this.draggable}>
-                  <div className="inner-wrapper" onContextMenu={this.onContextMenu}>
-                      <Resizable
-                          key="resizable"
-                          ref={c => { this.resizable = c; }}
-                          onResizeStart={this.onResizeStart}
-                          onResizeStop={this.onResizeStop}
-                          defaultSize={{
-                              width: this.state.pos.width,
-                              height: this.state.pos.height
-                          }}
-                      ><div className="div-map">&nbsp;</div></Resizable>
-                  </div>
-              </Draggable>  }
-          </div>
-      );*/
-    /*
-
-        <DragResizeContainer key="drag-container"
-            className='resize-container'
-            resizeProps={{ minWidth: 10, minHeight: 10, enable: { top: true, right: true, bottom: true, left: true, topRight: true, bottomRight: true, bottomLeft: true, topLeft: true } }}
-            layout={this.state.layout}
-            onLayoutChange={this.dragUpdate}
-            dragProps={{ disabled: false }}
-            scale={1}><div key="img-map" className="a-map">&nbsp;</div></DragResizeContainer>
-     */
-    //<a key="img-map" className="child-container size-auto border a-map" style={{ top: this.state.pos.y, left: this.state.pos.x, height: this.state.pos.height, width: this.state.pos.width }}>&nbsp;</a>
-    //results.unshift(<MyStupidHookTest key="img-map" />);
     return results;
   }
 }

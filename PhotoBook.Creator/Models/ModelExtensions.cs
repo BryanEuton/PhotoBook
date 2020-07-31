@@ -55,7 +55,7 @@ namespace PhotoBook.Creator.Models
                 TagTypes = tags.Select(t => t.Type).Distinct().ToList(),
                 PhotoBooks = thumbnail.PhotoBooks.Select(pb=> pb.PhotoBookId).ToList(),
                 Comments = thumbnail.Comments.Select(c=> c.Id).ToList(),
-                Faces = thumbnail.Faces.Where(f=> !f.IsHidden).Select(f=> f.ToFace()).ToList(),
+                Faces = thumbnail.Faces.Where(f=> !f.IsHidden).Select(f=> f.Id).ToList(),
                 Width = thumbnail.ImageWidth,
                 Height = thumbnail.ImageHeight,
                 Latitude = thumbnail.Latitude ?? thumbnail.Location?.Latitude,

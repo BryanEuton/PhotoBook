@@ -6,30 +6,38 @@ export const ContextMenu = props => {
   const [openContextMenu, setOpenContextMenu] = useState(props.isOpen),
     [coords, setCoords] = useState({ top: 0, left: 0 }),
     [buttonPressTimer, setButtonPressTimer] = useState(null),
-    [mouseLeaveTimeout, setMouseLeaveTimeout] = useState(null);
+    [mouseLeaveTimeout, setMouseLeaveTimeout] = useState(null),
+    isOpen = props.isOpen,
+    closeMenu = props.closeMenu,
+    id = props.id;
 
-  if (typeof props.isOpen === 'boolean' && props.isOpen !== openContextMenu) {
-    setOpenContextMenu(props.isOpen);
+  if (typeof isOpen === 'boolean' && isOpen !== openContextMenu) {
+    setOpenContextMenu(isOpen);
   }
   useEffect(() => {
+    let ignore = false;
     function handleDocumentClick() {
+      if (ignore) {
+        return;
+      }
       clearButtonTimer();
       if (openContextMenu) {
-        if (typeof props.isOpen === 'boolean' && typeof props.closeMenu === "function") {
-          props.closeMenu();
+        if (typeof isOpen === 'boolean' && typeof closeMenu === "function") {
+          closeMenu();
         } else {
           setOpenContextMenu(false);
         }
       }
     }
-    console.log(props.id + " listening for click - " + openContextMenu);
+    console.log(id + " listening for click - " + openContextMenu);
     document.addEventListener('click', handleDocumentClick);
     
     return /* clean up */() => {
-      console.log(props.id + " removing listening for click - " + openContextMenu);
+      ignore = true;
+      console.log(id + " removing listening for click - " + openContextMenu);
       document.removeEventListener('click', handleDocumentClick);
     };
-  }, [props.id, openContextMenu]);
+  }, [id, openContextMenu, isOpen, closeMenu]);
 
   function clearButtonTimer() {
     if (buttonPressTimer) {
@@ -76,7 +84,7 @@ export const ContextMenu = props => {
     stopEvent(e);
     clearButtonTimer();
     coords = coords || getCoords(e);
-    if (coords === null) {
+    if (typeof coords === 'undefined' || coords === null) {
       return;
     }
     if (props.onOpen) {

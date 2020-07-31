@@ -1,5 +1,4 @@
 ﻿import authService from '../api-authorization/AuthorizeService';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { ShowSuccessToast, ShowToastWithUndo } from './CommonService';
 

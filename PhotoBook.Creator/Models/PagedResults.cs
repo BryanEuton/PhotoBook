@@ -8,7 +8,7 @@ namespace PhotoBook.Creator.Models
 {
     public class PagedResults<T> : JsonResponse<T>
     {
-        public PagedResults(T results, int totalResults, string message = null) : base(true, results, message)
+        public PagedResults(T results, int totalResults, string message = null) : base(true, results, null, default(T), message)
         {
             TotalResults = totalResults;
         }

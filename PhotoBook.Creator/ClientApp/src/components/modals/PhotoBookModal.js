@@ -3,8 +3,6 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import googleMapsService from '../services/GoogleMapsService';
 import GoogleMapReact from 'google-map-react';
 import { stopEvent } from '../../utils';
-import { photoService } from '../services';
-
 
 function getMapBounds(map, maps, places, addMarkerListener) {
   const bounds = new maps.LatLngBounds(map.center);

@@ -12,7 +12,7 @@ class PhotoBookStore extends BaseStore {
   }
   async find(id) {
     return this.ready.then(() => {
-      var photoBook = this.state.find(pId => pId === id);
+      var photoBook = this.state.find(p => p.id === id);
       return (photoBook && photoBook.photos ? photoBook : null) || photoBookService.get(id).then(pb => {
         if (pb) {
           let updated = pb;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect  } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { Button } from 'reactstrap';
 import { commentStore } from '../stores';
 import { CommentModal, DeleteModal } from '../modals';
 import { stopEvent } from '../../utils';
@@ -12,7 +13,11 @@ export const ListComments = props => {
     [deleteCommentId, setDeleteCommentId] = useState(0),
     [numCommentsDisplayed, setNumCommentsDisplayed] = useState(5);
   useEffect(() => {
+    let ignore = false;
     function handleStoreUpdate(state) {
+      if (ignore) {
+        return;
+      }
       setComments(state.filter(c => c.thumbnailId === props.thumbnailId));
       setLoading(false);
     }
@@ -20,7 +25,10 @@ export const ListComments = props => {
     const unsubscribe = commentStore.subscribe(handleStoreUpdate);
     commentStore.load(props.thumbnailId);
 
-    return /* clean up */unsubscribe;
+    return () => {
+      ignore = true;
+      unsubscribe();
+    };
   }, [props.thumbnailId]);
 
   if (loading) {
@@ -60,7 +68,7 @@ export const ListComments = props => {
           )
         }
       </div>
-      {displayedComments.length < comments.length ? <a onClick={e => handleShowMoreComments(e)}>More</a> : null}
+      {displayedComments.length < comments.length ? <Button onClick={e => handleShowMoreComments(e)}>More</Button> : null}
     </div>
   );
 }

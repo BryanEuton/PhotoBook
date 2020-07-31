@@ -25,13 +25,40 @@ namespace PhotoBook.Creator.Controllers
     public class FacesController : BaseController
     {
         public FacesController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context) { }
-        
+
+        [HttpGet]
+        [Route("api/Faces/Get")]
+        [AjaxErrorHandler]
+        public ContentResult Get(long id)
+        {
+            var face = Context.Faces
+                .Include(f => f.Thumbnail)
+                .Include(f => f.Tag)
+                .FirstOrDefault( f=> f.Id == id);
+
+            return AjaxResult(face.ToFace());
+        }
+
+        [HttpGet]
+        [Route("api/Faces/GetFaces")]
+        [AjaxErrorHandler]
+        public ContentResult GetFaces(long imageId)
+        {
+            var faces = Context.Faces
+                .Include(f=> f.Thumbnail)
+                .Include(f => f.Tag)
+                .Where(f=> f.ThumbnailId == imageId)
+                .ToList();
+            
+            return AjaxResult(faces.Select(f=> f.ToFace()));
+        }
+
         [HttpPost]
         [Route("api/Faces/Save")]
         [AjaxErrorHandler]
         public ContentResult Save(FaceDto face)
         {
-            if (face == null || !(face.TagId > 0 || !string.IsNullOrWhiteSpace(face.Name)))
+            if (face == null || (face.Id == 0 && !(face.TagId > 0 || !string.IsNullOrWhiteSpace(face.Name))))
             {
                 return AjaxFailedResult("Must enter name for face.");
             }
@@ -50,6 +77,7 @@ namespace PhotoBook.Creator.Controllers
             }
 
             var dbFace = Context.Faces.Include(f => f.Tag).FirstOrDefault(p => p.Id == face.Id);
+            var orig = dbFace.ToFace();
             bool moved;
             if (dbFace == null)
             {
@@ -71,6 +99,11 @@ namespace PhotoBook.Creator.Controllers
                     dbFace.RectHeight == face.Height &&
                     dbFace.RectWidth == face.Width
                     );
+
+                if (!(face.TagId > 0 || !string.IsNullOrWhiteSpace(face.Name)) && dbFace.TagId.HasValue)
+                {
+                    face.TagId = dbFace.TagId.Value;
+                }
             }
 
             if (moved)
@@ -118,6 +151,8 @@ namespace PhotoBook.Creator.Controllers
             if (dbFace.Id == 0)
             {
                 Context.Faces.Add(dbFace);
+                orig = dbFace.ToFace();
+                orig.IsValid = false;
             }
             else
             {
@@ -126,7 +161,7 @@ namespace PhotoBook.Creator.Controllers
             }
             Context.SaveChanges();
 
-            return AjaxResult(dbFace.ToFace(), message);
+            return AjaxResult(dbFace.ToFace(), message, orig, Url.Action("Save"));
         }
 
         [HttpPost]
@@ -226,14 +261,15 @@ namespace PhotoBook.Creator.Controllers
         [HttpPost]
         [Route("api/Faces/Remove")]
         [AjaxErrorHandler]
-        public ContentResult ToggleRemove(long faceId)
+        public ContentResult ToggleRemove(long id)
         {
-            var face = Context.Faces.Include(f=> f.Thumbnail).Include(f=> f.Tag).FirstOrDefault(f => f.Id == faceId);
+            var face = Context.Faces.Include(f=> f.Thumbnail).Include(f=> f.Tag).FirstOrDefault(f => f.Id == id);
             if (face == null)
             {
                 return AjaxFailedResult("Face not found.");
             }
 
+            var orig = face.ToFace();
             var thumbnail = face.Thumbnail;
             if (thumbnail == null)
             {
@@ -265,7 +301,7 @@ namespace PhotoBook.Creator.Controllers
             Context.SaveChanges();
                         
             //result of true means face was "removed".  Otherwise it will be added back.
-            return AjaxResult(face.ToFace(), $"{(remove ? "Removed" : "Added")} Face { face.Id }");
+            return AjaxResult(face.ToFace(), $"{(remove ? "Removed" : "Added")} Face { face.Id }", null, Url.Action("ToggleRemove", new { id }));
         }
 
         [HttpPost]

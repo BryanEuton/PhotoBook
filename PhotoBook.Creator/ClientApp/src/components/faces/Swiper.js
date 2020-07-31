@@ -1,4 +1,4 @@
-import React, { useState, } from 'react';
+import React, { useState } from 'react';
 import Calendar from '@lls/react-light-calendar';
 import Moment from 'react-moment';
 import { faCalendar } from '@fortawesome/free-regular-svg-icons';
@@ -97,7 +97,7 @@ export const FaceSwiper = props => {
     });
   
   function updateFaceTag(tag) {
-    if (faces[index], tag && tag.id > 0) {
+    if (faces[index] && tag && tag.id > 0) {
       const updatedFace = Object.assign({}, faces[index]);
       updatedFace.tagId = tag.id;
       setSaving(true);
@@ -335,9 +335,6 @@ export const FaceSwiper = props => {
   }
   function toggleCalendar(e) {
     setCalendarOpen(!isCalendarOpen);
-  }
-  function openCalendar(e) {
-    setCalendarOpen(true);
   }
   function onCalendarChange(startDate, endDate) {
     const updated = { start: new Date(startDate), end: endDate ? new Date(endDate) : null};

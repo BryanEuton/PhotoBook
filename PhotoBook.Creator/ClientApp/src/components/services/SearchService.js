@@ -1,7 +1,7 @@
 ﻿import authService from '../api-authorization/AuthorizeService';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-//import { SearchDispatcher, SearchActionTypes } from "../dispatchers";
+import imageStore from '../stores/ImageStore';
 
 class SearchService {
 
@@ -17,7 +17,7 @@ class SearchService {
           }
         );
       if (response.data && response.data.success) {
-        //SearchDispatcher.dispatch({ type: SearchActionTypes.SET_SEARCH_RESULTS, terms, results: response.data.results, totalResults: response.data.totalResults });
+        imageStore.update(response.data.results);
         return { terms, results: response.data.results, totalResults: response.data.totalResults, resultsOrder: response.data.resultsOrder};
       }
       return null;
