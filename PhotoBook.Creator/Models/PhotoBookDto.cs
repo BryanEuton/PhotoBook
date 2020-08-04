@@ -21,5 +21,7 @@ namespace PhotoBook.Creator.Models
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public int NumPhotos { get; set; }
+        public List<string> Whitelist { get; set; }
+        public List<string> Blacklist { get; set; }
     }
 }

@@ -37,7 +37,8 @@ namespace PhotoBook.Creator.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserName),
                 new Claim("displayName", user.DisplayName ?? user.FullName),
-                new Claim("isAdmin", user.IsAdmin.ToString()),
+                new Claim("isAdmin", user.IsAdmin.ToString(), ClaimValueTypes.Boolean),
+                new Claim("isGuest", user.IsGuest.ToString(), ClaimValueTypes.Boolean)
             };
 
             context.IssuedClaims.AddRange(claims);

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using PhotoBook.DataManager;
@@ -52,6 +53,8 @@ namespace PhotoBook.Creator.Controllers
         }
 
         protected string GetUserName => User.FindFirstValue(ClaimTypes.NameIdentifier);
+        protected bool IsAdmin => User.FindFirstValue("isAdmin")?.Equals("True", StringComparison.CurrentCultureIgnoreCase) ?? true;
+        protected bool IsGuest => User.FindFirstValue("isGuest")?.Equals("True", StringComparison.CurrentCultureIgnoreCase) ?? true;
         public Common.Helpers Helpers => _helpers ??= new Common.Helpers(PhotosLocation, Configuration, new HttpContextAccessor(), Configuration["ConnectionStrings:PhotoBookConnection"]);
 
         private string _photosLocation;

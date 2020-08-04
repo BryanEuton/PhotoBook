@@ -40,14 +40,21 @@ export const Home = function (props) {
   return <div>
     <h1>Welcome to the Photo Book Creator!</h1>
     {isAuthenticated ?
-      <div>
-        <p>To get started, go create your first <a href="/PhotoBooks">photo book</a> <br /> Then go <a href="/Search">search</a> for some photos to add</p>
-        <Button color="primary" onClick={e => clearClick(e)} >{buttonText}</Button>
-      </div> : 
-      <div>
+      (
+        props.isGuest ?
+          (<div>
+            <p>View <a href="/PhotoBooks">photo books</a></p>
+            <Button color="primary" onClick={e => clearClick(e)} >{buttonText}</Button>
+          </div>) :
+          (<div>
+            <p>To get started, go create your first <a href="/PhotoBooks">photo book</a> <br /> Then go <a href="/Search">search</a> for some photos to add</p>
+            <Button color="primary" onClick={e => clearClick(e)} >{buttonText}</Button>
+          </div>)
+      ): 
+      (<div>
         <Button color="primary" onClick={e => clearClick(e)} >{buttonText}</Button>
         <p>To get started, please <a href={`${ApplicationPaths.Login}`}>log in</a></p>
-      </div>
+        </div>)
     }
   </div>;
 }

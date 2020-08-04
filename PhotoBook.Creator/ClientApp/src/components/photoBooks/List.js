@@ -36,7 +36,7 @@ export class PhotoBookList extends Component {
   render() {
     return (
       <div className="photoBooks">
-        <Button color="primary" tag={Link} to="/PhotoBook/Create">Create</Button>
+        { this.props.isGuest ? null : <Button color="primary" tag={Link} to="/PhotoBook/Create">Create</Button>}
         <div className="row">
           {this.state.photoBooks.map(photoBook=>
             <div key={photoBook.id} className="col-sm-12 photoBook">
@@ -44,8 +44,8 @@ export class PhotoBookList extends Component {
               <p>{photoBook.timeFrame}</p>
               <p>{photoBook.numPhotos} photos</p>
               <Button color="primary" tag={Link} to={`/PhotoBook/${photoBook.id}/Photos`}>View Photos</Button>
-              <Button color="primary" tag={Link} to={`/PhotoBook/${photoBook.id}/Update`}>Update</Button>
-              <Button color="secondary" onClick={e => this.delete(e, photoBook)}>Delete</Button>
+              {this.props.isGuest ? null : <Button color="primary" tag={Link} to={`/PhotoBook/${photoBook.id}/Update`}>Update</Button>}
+              {this.props.isGuest ? null : <Button color="secondary" onClick={e => this.delete(e, photoBook)}>Delete</Button>}
             </div>
           )}
         </div>

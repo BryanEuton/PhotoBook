@@ -4,5 +4,6 @@ import imageStore from './ImageStore';
 import locationStore from './LocationStore';
 import photoBookStore from './PhotoBookStore';
 import tagStore from './TagStore';
+import userStore from './UserStore';
 
-export { commentStore, faceStore, imageStore, locationStore, photoBookStore, tagStore }
+export { commentStore, faceStore, imageStore, locationStore, photoBookStore, tagStore, userStore }

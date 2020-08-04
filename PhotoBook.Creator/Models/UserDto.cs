@@ -1,33 +1,30 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Common.IdentityManager.Models
+namespace PhotoBook.Creator.Models
 {
-    public class ApplicationUser : IdentityUser
+    public class UserDto
     {
+        /// <summary>
+        /// Gets the primary key for this user.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// The user's first name.
         /// </summary>
-        [MaxLength(50)]
-        [PersonalData]
         public string FirstName { get; set; }
 
         /// <summary>
         /// The user's last name.
         /// </summary>
-        [MaxLength(80)]
-        [PersonalData]
         public string LastName { get; set; }
 
         /// <summary>
         /// The user's desired display name.
         /// </summary>
-        [MaxLength(80)]
-        [PersonalData]
         public string DisplayName { get; set; }
 
         public bool IsAdmin { get; set; }
@@ -40,7 +37,6 @@ namespace Common.IdentityManager.Models
         /// <summary>
         /// The user's full name.
         /// </summary>
-        [NotMapped]
         public string FullName
         {
             get
@@ -54,5 +50,6 @@ namespace Common.IdentityManager.Models
                 return string.Empty;
             }
         }
+
     }
 }

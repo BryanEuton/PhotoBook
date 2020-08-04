@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Route } from 'react-router';
+import authService from './components/api-authorization/AuthorizeService';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Search }  from './components/search/Search';
@@ -20,33 +21,60 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
 toast.configure();
+export const App = function (props) {
+  const [isAuthenticated, setAuthenticated] = useState(false),
+    [isGuest, setIsGuest] = useState(true);
 
-export default class App extends Component {
-  static displayName = App.name;
+  useEffect(() => {
+    let ignore = false;
+    async function handleUpdate(state) {
+      if (ignore) {
+        return;
+      }
+      const user = await authService.getUser(),
+        authenticated = !!user;
+      if (ignore) {
+        return;
+      }
+      console.log('received update', state, authenticated);
+      if (authenticated !== isAuthenticated) {
+        setAuthenticated(authenticated);
+      }
+      if ((!authenticated && !isGuest) || (authenticated && user.isGuest !== isGuest)) {
+        setIsGuest(user.isGuest);
+      }
+    }
+    console.log('subscribing to auth!', props.path);
+    const subscription = authService.subscribe(handleUpdate);
+    handleUpdate();
 
-  render () {
-    return (
-        <Layout>
-        <ToastContainer />
-        <Route exact path='/' component={Home} />
-        <AuthenticatedRoute path='/search' component={Search} />
-        <AuthenticatedRoute exact path='/faceswiper' component={FaceSwiper} />        
-        <AuthenticatedRoute exact path='/faces' component={Faces} />
-        <AuthenticatedRoute exact path='/Tag/create' component={TagEditor} />
-        <AuthenticatedRoute exact path='/Tag/:id/update' component={TagEditor} />
-        <AuthenticatedRoute exact path='/Tags/:tagType' component={TagList} />
-        <AuthenticatedRoute path='/TagTypes' component={TagTypes} />
-        <AuthenticatedRoute exact path='/PhotoBook/create' component={PhotoBookEditor} />
-        <AuthenticatedRoute exact path='/PhotoBook/:id/update' component={PhotoBookEditor} />
-        <AuthenticatedRoute exact path='/PhotoBook/:id/photos' component={PhotoBookPhotos} />
-        <AuthenticatedRoute path='/PhotoBooks' component={PhotoBookList} />
-        <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
-        <Route path='/Account/Login' component={RedirectToIdentity} />
-      </Layout>
-    );
-  }
+    return /* clean up */() => {
+      ignore = true;
+      console.log('unsubscribing to auth!');
+      authService.unsubscribe(subscription);
+    };
+  }, [props.path]);
+
+  return (
+    <Layout isAuthenticated={isAuthenticated} isGuest={isGuest}>
+      <ToastContainer />
+      <AuthenticatedRoute exact path='/' component={Home} allowAnonymous= {true} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute path='/search' component={Search} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/faceswiper' component={FaceSwiper} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/faces' component={Faces} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/Tag/create' component={TagEditor} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/Tag/:id/update' component={TagEditor} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/Tags/:tagType' component={TagList} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute path='/TagTypes' component={TagTypes} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/PhotoBook/create' component={PhotoBookEditor} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/PhotoBook/:id/update' component={PhotoBookEditor} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute exact path='/PhotoBook/:id/photos' component={PhotoBookPhotos} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <AuthenticatedRoute path='/PhotoBooks' component={PhotoBookList} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} isAuthenticated={isAuthenticated} isGuest={isGuest} />
+      <Route path='/Account/Login' component={RedirectToIdentity} />
+    </Layout>
+  );
 }
-
 axios.interceptors.response.use(response => { // intercept the global error
     return response;
   },

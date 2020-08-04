@@ -161,11 +161,18 @@ export const Image = props => {
   }
   return (
     <div className="image-holder">
-      <ImageContextMenu id={props.id} img={img} imgDetails={details} displayAllFaces={props.displayAllFaces} displayFaces={displayFaces} toggleDisplayAllFaces={toggleDisplayAllFaces} toggleDisplayFaces={toggleDisplayFaces}>
-        <LazyLoad height={img.height} once placeholder={<Spinner />}>
-          <img src={`/images/get/${props.id}`} ref={node => { setImgNode(node);}} alt={img.fileName} />
-        </LazyLoad>
-      </ImageContextMenu>
+      { props.isGuest ? (
+          <LazyLoad height={img.height} once placeholder={<Spinner />}>
+            <img src={`/images/get/${props.id}`} ref={node => { setImgNode(node); }} alt={img.fileName} />
+          </LazyLoad>)
+          : (
+
+          <ImageContextMenu id={props.id} img={img} imgDetails={details} displayAllFaces={props.displayAllFaces} displayFaces={displayFaces} toggleDisplayAllFaces={toggleDisplayAllFaces} toggleDisplayFaces={toggleDisplayFaces}>
+            <LazyLoad height={img.height} once placeholder={<Spinner />}>
+              <img src={`/images/get/${props.id}`} ref={node => { setImgNode(node); }} alt={img.fileName} />
+            </LazyLoad>
+          </ImageContextMenu>)
+      }
       <p>
         {img.fileName}
         {
@@ -173,7 +180,7 @@ export const Image = props => {
             <FontAwesomeIcon title="Click to close Photo Details" icon={faMinus} onClick={e => setDetailsOpen(false)} /> :
             <FontAwesomeIcon title="Click to open Photo Details" icon={faPlus} onClick={e => setDetailsOpen(true)} />
         }
-        {img.faces.length === 0 ? null : <FontAwesomeIcon title="Click to display Faces" icon={!(displayFaces || props.displayAllFaces) ? faIdBadge : far.faIdBadge} onClick={e => toggleDisplayFaces()} />}
+        { props.isGuest || img.faces.length === 0 ? null : <FontAwesomeIcon title="Click to display Faces" icon={!(displayFaces || props.displayAllFaces) ? faIdBadge : far.faIdBadge} onClick={e => toggleDisplayFaces()} />}
         {!(img.locationId > 0) ? null : <FontAwesomeIcon title="Click to display exif data" icon={displayExif ? faMapMarker : faMapMarkerAlt} onClick={e => setDisplayExif(!displayExif)} />}
         {img.comments.length === 0 ? null : <FontAwesomeIcon title={displayComments ? "Click to hide comments" : "Click to display comments"} icon={ displayComments ? faComment : faCommentAlt} onClick={e => setDisplayComments(!displayComments)} />}
         <FontAwesomeIcon title="Click to create a comment" icon={far.faComment} onClick={e => setCreateComment(true)} />

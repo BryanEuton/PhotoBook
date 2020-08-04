@@ -4,38 +4,14 @@ import { ApplicationPaths } from './api-authorization/ApiAuthorizationConstants'
 import { Route } from 'react-router';
 
 export const AuthenticatedRoute = function (props) {
-  const [isAuthenticated, setAuthenticated] = useState(false),
-    Component = props.component;
-
-  useEffect(() => {
-    let ignore = false;
-    async function handleUpdate(state) {
-      if (ignore) {
-        return;
-      }
-      const authenticated = await authService.isAuthenticated();
-      console.log('received update', state, authenticated);
-      if (authenticated !== isAuthenticated) {
-        setAuthenticated(authenticated);
-      }
-    }
-    console.log('subscribing to auth!', props.path);
-    const subscription = authService.subscribe(handleUpdate);
-    handleUpdate();
-
-    return /* clean up */() => {
-      ignore = true;
-      console.log('unsubscribing to auth!');
-      authService.unsubscribe(subscription);
-    };
-  }, [props.path]);
+  const Component = props.component;
 
   return <Route
     exact={props.exact}
     path={props.path}
     render={p =>
-    isAuthenticated ? (
-        <Component {...p} />
+      props.isAuthenticated || props.allowAnonymous ? (
+        <Component {...props} {...p} />
       ) : (<p><i>Unable to load.  Please <a href={`${ApplicationPaths.Login}`}>log in</a> first</i></ p>)
     }
   />;

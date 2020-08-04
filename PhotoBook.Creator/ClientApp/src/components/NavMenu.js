@@ -27,7 +27,12 @@ export class NavMenu extends Component {
     });
   }
   render() {
-
+    var authenticatedNavItems = [
+      <NavItem key="search"><NavLink tag={Link} className="text-dark" to="/search" onClick={this.closeNavbar}>Search</NavLink></NavItem>,
+      <NavItem key="faces"><NavLink tag={Link} className="text-dark" to="/faces" onClick={this.closeNavbar}>Faces</NavLink></NavItem>,
+      <NavItem key="tagtypes"><NavLink tag={Link} className="text-dark" to="/TagTypes" onClick={this.closeNavbar}>Tags</NavLink></NavItem>,
+      <NavItem key="photobooks"><NavLink tag={Link} className="text-dark" to="/PhotoBooks" onClick={this.closeNavbar}>PhotoBooks</NavLink></NavItem>
+      ];
     return (
       <header>
         <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" light>
@@ -39,18 +44,12 @@ export class NavMenu extends Component {
                 <NavItem>
                   <NavLink tag={Link} className="text-dark" to="/" onClick={this.closeNavbar}>Home</NavLink>
                 </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/search" onClick={this.closeNavbar}>Search</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/faces" onClick={this.closeNavbar}>Faces</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/TagTypes" onClick={this.closeNavbar}>Tags</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/PhotoBooks" onClick={this.closeNavbar}>PhotoBooks</NavLink>
-                </NavItem>
+                {this.props.isAuthenticated && !this.props.isGuest? authenticatedNavItems : null}
+                {
+                  !(this.props.isAuthenticated && this.props.isGuest) ?
+                    null :
+                    <NavItem><NavLink tag={Link} className="text-dark" to="/PhotoBooks" onClick={this.closeNavbar}>PhotoBooks</NavLink></NavItem>
+                }
                 <LoginMenu>
                 </LoginMenu>
               </ul>

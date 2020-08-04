@@ -7,6 +7,11 @@ using PhotoBook.DataManager;
 using Microsoft.AspNetCore.Authorization;
 using PhotoBook.Creator.Models;
 using System.Collections.Generic;
+using System.IO.Compression;
+using System.Net.Mime;
+using System.Security.Claims;
+using IdentityServer4.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PhotoBook.Creator.Filters;
@@ -16,8 +21,11 @@ namespace PhotoBook.Creator.Controllers
 {
     public class PhotoBooksController : BaseController
     {
-        public PhotoBooksController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
-        {}
+        private IHostingEnvironment _env;
+        public PhotoBooksController(IHostingEnvironment env, IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
+        {
+            _env = env;
+        }
 
         [HttpGet]
         [Route("api/PhotoBook/Get")]
@@ -25,14 +33,10 @@ namespace PhotoBook.Creator.Controllers
         // GET: Photos
         public IEnumerable<PhotoBookDto> Get()
         {
-            //return _context.PhotoBooks.Include(pb => pb.Photos).Select(pb => pb.ToPhotoBookDto()).ToList();
-            return Context.PhotoBooks.Select(photoBook => new PhotoBookDto
-            {
-                Id = photoBook.Id,
-                TimeFrame = photoBook.TimeFrame,
-                Title = photoBook.Title,
-                NumPhotos = photoBook.Photos.Count
-            }).ToList();
+            var myId = User.GetSubjectId();
+            return Context.PhotoBooks
+                .Where(p=> (IsAdmin || (IsGuest && p.WhitelistIds.Contains(myId))) && !p.BlacklistIds.Contains(myId))
+                .Select(photoBook => photoBook.ToPhotoBookDto()).ToList();
         }
 
         [HttpGet]
@@ -41,8 +45,10 @@ namespace PhotoBook.Creator.Controllers
         // GET: Photos
         public PhotoBookWithPhotosDto Get(long id)
         {
+            var myId = User.GetSubjectId();
             var photoBook = Context.PhotoBooks
                 .Include(pb => pb.Photos)
+                .Where(p => (IsAdmin || (IsGuest && p.WhitelistIds.Contains(myId))) && !p.BlacklistIds.Contains(myId))
                 .FirstOrDefault(pb => pb.Id == id);
             if (photoBook == null)
             {
@@ -172,6 +178,9 @@ namespace PhotoBook.Creator.Controllers
                 }
                 dbPhotoBook.Title = photoBook.Title;
                 dbPhotoBook.TimeFrame = photoBook.TimeFrame;
+                dbPhotoBook.Whitelist = photoBook.Whitelist;
+                dbPhotoBook.Blacklist = photoBook.Blacklist;
+
                 Context.Entry(dbPhotoBook).State = EntityState.Modified;
                 Context.SaveChanges();
 
@@ -239,6 +248,69 @@ namespace PhotoBook.Creator.Controllers
             }
 
             return AjaxResult<bool>(true, $"{photoBook.Title} Published to {dir}");
+        }
+
+        [Authorize(AuthenticationSchemes = "cookies")]
+        [ResponseCache(Duration = /* 1 month */ 2592000)]
+        [HttpGet("photobooks/{id}/download")]
+        // GET: Photos
+        public ActionResult Download(long id)
+        {
+            var photoBook = Context.PhotoBooks
+                .Include(pb=> pb.Photos)
+                .ThenInclude(p=> p.Thumbnail)
+                .FirstOrDefault(pb=> pb.Id == id);
+            if (photoBook == null)
+            {
+                return new NotFoundResult();
+            }
+
+            var root = _env.WebRootPath;
+            var tmp = Path.Combine(root, "tmp");
+            if (!Directory.Exists(tmp))
+            {
+                Directory.CreateDirectory(tmp);
+            }
+
+            var photoBookTempName = Path.Combine(tmp, photoBook.Id + ".zip");
+            if (System.IO.File.Exists(photoBookTempName))
+            {
+                var fileInfo = new System.IO.FileInfo(photoBookTempName);
+                if (photoBook.LastUpdated.HasValue && fileInfo.LastWriteTime < photoBook.LastUpdated.Value)
+                {
+                    System.IO.File.Delete(photoBookTempName);
+                }
+            }
+            if (!System.IO.File.Exists(photoBookTempName))
+            {
+                try
+                {
+                    using (var fs = new FileStream(photoBookTempName, FileMode.Create))
+                    {
+                        using (var zip = new ZipArchive(fs, ZipArchiveMode.Create, true))
+                        {
+                            foreach (var photo in photoBook.Photos)
+                            {
+                                var path = Helpers.GetFullPath(photo.Thumbnail);
+                                if (System.IO.File.Exists(path))
+                                {
+                                    zip.CreateEntryFromFile(path, photo.Thumbnail.FileName);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, $"Failed zipping the photobook { id}: {photoBook.Title} due to: {ex.Message}: {ex}");
+                }
+            }
+            if (System.IO.File.Exists(photoBookTempName))
+            {
+                var relativePath = "tmp/" + photoBook.Id + ".zip";
+                return File(relativePath, "application/zip", photoBook.Title + ".zip");
+            }
+            return new NotFoundResult();
         }
     }
 }

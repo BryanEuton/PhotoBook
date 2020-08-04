@@ -16,7 +16,9 @@ namespace PhotoBook.Creator.Models
                 Id = photoBook.Id,
                 TimeFrame = photoBook.TimeFrame,
                 Title = photoBook.Title,
-                NumPhotos = photoBook.Photos.Count
+                NumPhotos = photoBook.Photos.Count,
+                Whitelist = photoBook.Whitelist,
+                Blacklist = photoBook.Blacklist
             };
         }
         public static PhotoBookWithPhotosDto ToPhotoBookWithPhotosDto(this DataManager.Models.PhotoBook photoBook)
@@ -27,6 +29,8 @@ namespace PhotoBook.Creator.Models
                 TimeFrame = photoBook.TimeFrame,
                 Title = photoBook.Title,
                 NumPhotos = photoBook.Photos.Count,
+                Whitelist = photoBook.Whitelist,
+                Blacklist = photoBook.Blacklist,
                 //Photos = photoBook.Photos.Select(p=> p.Thumbnail.ToImageDto()).ToList()
             };
         }
@@ -157,6 +161,20 @@ namespace PhotoBook.Creator.Models
                 CreatedBy = createdBy?.DisplayName ?? createdBy?.FullName,
                 CanEdit = comment.CreatedBy == currentUser,
                 CanDelete= comment.CreatedBy == currentUser
+            };
+        }
+
+        public static UserDto ToUserDto(this ApplicationUser user)
+        {
+            return new UserDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DisplayName = user.DisplayName,
+                IsActive = user.IsActive,
+                IsAdmin = user.IsAdmin,
+                IsGuest = user.IsGuest
             };
         }
     }

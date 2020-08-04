@@ -20,14 +20,16 @@ export class PhotoBookPhotos extends Component {
       this.id = Number(this.props.match.params.id);
     }
     this.state = {
-      pageSize: 50,
-      page: 1,
+      
       searching: false,
       displayAllFaces: false,
       filters: [],
       tags: [],
-      pagedResults: [],
-      searchResults: { numResults: 0 },
+      searchResults: {
+        numResults: 0,
+        pageSize: 50,
+        page: 1
+      },
       numColumnsClass: "three-col"
     };
 
@@ -51,14 +53,17 @@ export class PhotoBookPhotos extends Component {
   }
   handlePhotoBookStoreChange(photoBooks) {
     const photoBook = this.filterPhotoBooks(photoBooks.find(pb => pb.id === this.id), this.state.filters);
-    this.setState({ photoBook });
-    this.handleSearch(photoBook, 1, this.state.pageSize);
+    this.setState({ photoBook, searched: true });
+    this.handleSearch(photoBook, 1, this.state.searchResults.pageSize);
   }
   filterPhotoBooks(photoBook, filters) {
-    if (!photoBook || typeof photoBook.photos === 'undefined') {
+    if (!photoBook) {
       return { notFound: true };
     }
-
+    if (typeof photoBook.photos === 'undefined') {
+      return { loading: true };
+    }
+    
     if (filters.length > 0) {
       photoBook.filteredResults = photoBook.photos.filter(p => p.tags.find(id => filters.find(f => f.id === id)));
     } else {
@@ -74,8 +79,8 @@ export class PhotoBookPhotos extends Component {
     });
   }
   handlePageChange(pageNumber) {
-    if (this.state.searched && this.searchParams && !this.state.searching) {
-      this.handleSearch(this.state.photoBook, pageNumber, this.state.pageSize);
+    if (this.state.searched && this.state.searchResults && !this.state.searching) {
+      this.handleSearch(this.state.photoBook, pageNumber, this.state.searchResults.pageSize);
     }
   }
   handleSearch(photoBook, page, pageSize) {
@@ -83,7 +88,14 @@ export class PhotoBookPhotos extends Component {
       const pagedResults = photoBook.filteredResults
         .slice((page - 1) * pageSize)
         .slice(0, pageSize);
-      this.setState({ pagedResults, page, pageSize });
+      this.setState({
+        searchResults: {
+          page: page,
+          pageSize: pageSize,
+          numResults: photoBook.filteredResults.length,
+          pagedResults: pagedResults
+        }
+      });
     }
   }
   handleFilterChange(type, value) {
@@ -91,7 +103,10 @@ export class PhotoBookPhotos extends Component {
       if (this.state.searched && !this.state.searching && this.searchParams) {
         this.handleSearch(this.state.photoBook, 1, value);
       } else {
-        this.setState({ pageSize: value });
+        var updatedSearchResults = this.state.searchResults;
+        updatedSearchResults.pageSize = value;
+        updatedSearchResults.page = 1;
+        this.setState({ searchResults: updatedSearchResults });
       }
       return;
     } else if (type === 'columnsize') {
@@ -109,20 +124,20 @@ export class PhotoBookPhotos extends Component {
     }
     const photoBook = this.filterPhotoBooks(this.state.photoBook, filters);
     this.setState({ filters, photoBook });
-    this.handleSearch(photoBook, 1, this.state.pageSize);
+    this.handleSearch(photoBook, 1, this.state.searchResults.pageSize);
   }
   handleRemoveFilter(filter) {
     const filters = this.state.filters.filter(f => !(f.id === filter.id && f.type === filter.type)),
       photoBook = this.filterPhotoBooks(this.state.photoBook, filters);
     this.setState({ filters, photoBook });
-    this.handleSearch(photoBook, 1, this.state.pageSize);
+    this.handleSearch(photoBook, 1, this.state.searchResults.pageSize);
   }
 
   renderSearchResults() {
     return (
       <PagedResults {...this.props} pagedResults={this.state.searchResults} handlePageChange={pageNumber => this.handlePageChange(pageNumber)} numColumnsClass={this.state.numColumnsClass}>
         {
-          this.state.pagedResults.map(img =>
+          this.state.searchResults.pagedResults.map(img =>
             <Image {...this.props} key={img.id} id={img.id} locationId={img.locationId} img={img} displayAllFaces={this.state.displayAllFaces} toggleDisplayAllFaces={() => this.setState({ displayAllFaces: !this.state.displayAllFaces })} tags={this.state.tags} locations={this.state.locations} />
           )
         }
@@ -147,11 +162,12 @@ export class PhotoBookPhotos extends Component {
     if (!this.state.photoBook) {
       return (<p><em>...Loading</em></p>);
     } else if (this.state.photoBook.notFound) {
+      debugger;
       return (<p><em>PhotoBook not found</em></p>);
     }
 
     var results = null;
-    if (this.state.pagedResults.length > 0) {
+    if (this.state.searchResults.numResults > 0) {
       results = this.renderSearchResults();
     } else {
       results = <div><p>No Results</p></div>
@@ -161,12 +177,13 @@ export class PhotoBookPhotos extends Component {
       <div className="photo-books">
         <ButtonToolbar >
           <Button color="primary" tag={Link} to="/PhotoBooks">Back</Button>
-          <Button color="secondary" onClick={this.publish} >Publish</Button>
+          {this.props.isGuest ? null : <Button color="secondary" onClick={this.publish} >Publish</Button>}
           <Button color="secondary" onClick={this.showMap} >Show Map</Button>
+          <a href={`/PhotoBooks/${this.id}/Download`} target="_blank">Download</a>
         </ButtonToolbar>
         <h1>{this.state.photoBook.title}</h1>
 
-        <PagedResultsForm {...this.props} handleFilterChange={(type, value) => this.handleFilterChange(type, value)} handleRemoveFilter={filter => this.handleRemoveFilter(filter)} numColumnsClass={this.state.numColumnsClass} filters={this.state.filters} pageSize={this.state.pageSize} >
+        <PagedResultsForm {...this.props} handleFilterChange={(type, value) => this.handleFilterChange(type, value)} handleRemoveFilter={filter => this.handleRemoveFilter(filter)} numColumnsClass={this.state.numColumnsClass} filters={this.state.filters} pageSize={this.state.searchResults.pageSize} >
         </PagedResultsForm>
         {results}
         {this.state.showPhotoBookModal ? <PhotoBookModal photoBook={this.state.photoBook} locations={this.state.locations} onClose={e => this.setState({showPhotoBookModal: false})} /> : null}
