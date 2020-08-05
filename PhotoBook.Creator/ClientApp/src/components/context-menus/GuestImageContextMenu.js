@@ -96,7 +96,7 @@ export class GuestImageContextMenu extends Component {
   {
     return (
       <div className="dropdown-menu" ref={c => { this.menu = c;}}>
-        <a href={`/images/full/${this.props.id}`} target="_blank" download><DropdownItem onMouseOver={e => this.activateMenuItem(e, "download")} onClick={e => this.download(e)} toggle={false}><span>Download</span></DropdownItem></a>
+        <DropdownItem onMouseOver={e => this.activateMenuItem(e, "download")} onClick={e => this.download(e)} toggle={false}><span>Download</span></DropdownItem>
         <DropdownItem onMouseOver={e => this.activateMenuItem(e, "enlarge")} onClick={e => this.enlarge(e)} toggle={false}><span>Enlarge</span></DropdownItem>
       </div>
     );
