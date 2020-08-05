@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faIdBadge, faMapMarker, faMapMarkerAlt, faComment, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import $ from 'jquery';
-import { ImageContextMenu  } from './context-menus';
+import { ImageContextMenu, GuestImageContextMenu  } from './context-menus';
 import { faceStore, imageStore } from './stores';
 import { CommentModal } from './modals';
 import { FaceImage } from './FaceImage';
@@ -162,9 +162,12 @@ export const Image = props => {
   return (
     <div className="image-holder">
       { props.isGuest ? (
+
+        <GuestImageContextMenu id={props.id} img={img} imgDetails={details}>
           <LazyLoad height={img.height} once placeholder={<Spinner />}>
             <img src={`/images/get/${props.id}`} ref={node => { setImgNode(node); }} alt={img.fileName} />
-          </LazyLoad>)
+          </LazyLoad>
+        </GuestImageContextMenu>)
           : (
 
           <ImageContextMenu id={props.id} img={img} imgDetails={details} displayAllFaces={props.displayAllFaces} displayFaces={displayFaces} toggleDisplayAllFaces={toggleDisplayAllFaces} toggleDisplayFaces={toggleDisplayFaces}>
