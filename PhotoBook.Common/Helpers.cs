@@ -200,6 +200,11 @@ namespace PhotoBook.Common
                         }
                     }
 
+                    if (!File.Exists(file))
+                    {
+                        Logger.Info($"Image does not exist anymore '{file}'. Skipping.");
+                        continue;
+                    }
                     using (var img = Image.Load(file))
                     using (var bitmap = Resize(img))
                     {
