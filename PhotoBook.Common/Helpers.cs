@@ -244,7 +244,7 @@ namespace PhotoBook.Common
 
         private DateTime GetImageCreateDate(Image img, string path, string fileName)
         {
-            if (img.Metadata.ExifProfile.TryGetValue(ExifTag.DateTimeOriginal, out var exifValue) && exifValue.Value is byte[] createDateBytes)//.Any(x => x == Base.Constants.ExifCreateDatePropertyId))
+            if (img.Metadata.ExifProfile != null && img.Metadata.ExifProfile.TryGetValue(ExifTag.DateTimeOriginal, out var exifValue) && exifValue != null && exifValue.Value is byte[] createDateBytes)//.Any(x => x == Base.Constants.ExifCreateDatePropertyId))
             {
                 return DateTime.Parse(new Regex(":").Replace(Encoding.UTF8.GetString(createDateBytes), "-", 2));
             }
@@ -260,7 +260,7 @@ namespace PhotoBook.Common
 
         private float? GetGpsValue(Image img, ExifTag propItemRefValue, ExifTag propItemValue)
         {
-            if (!(img.Metadata.ExifProfile.TryGetValue(propItemRefValue, out var propItemRef) && img.Metadata.ExifProfile.TryGetValue(propItemValue, out var propItem)))
+            if (img.Metadata.ExifProfile == null || !(img.Metadata.ExifProfile.TryGetValue(propItemRefValue, out var propItemRef) && propItemRef != null && img.Metadata.ExifProfile.TryGetValue(propItemValue, out var propItem) && propItem != null))
             {
                 return null;
             }
@@ -279,7 +279,7 @@ namespace PhotoBook.Common
         private float? GetAltitude(Image img)
         {
 
-            if (!(img.Metadata.ExifProfile.TryGetValue(ExifTag.GPSAltitudeRef, out var propItemRef) && img.Metadata.ExifProfile.TryGetValue(ExifTag.GPSAltitude, out var propItem)))
+            if (img.Metadata.ExifProfile == null || !(img.Metadata.ExifProfile.TryGetValue(ExifTag.GPSAltitudeRef, out var propItemRef) && propItemRef != null && img.Metadata.ExifProfile.TryGetValue(ExifTag.GPSAltitude, out var propItem) && propItem != null))
             {
                 return null;
             }
@@ -295,14 +295,14 @@ namespace PhotoBook.Common
         {
             if (!propItem.IsArray)
             {
-                return (float) ((Rational) propItem.Value).ToDouble();
+                return (float) (propItem.Value is SignedRational ? ((SignedRational)propItem.Value).ToDouble() : ((Rational)propItem.Value).ToDouble());
             }
-            var rationals = (Rational[]) propItem.Value;
-            if (index >= 0 && index < rationals.Length)
+            var rationals = propItem.Value is SignedRational[]? ((SignedRational[])propItem.Value).Select(r=> r.ToDouble()).ToList() : ((Rational[])propItem.Value).Select(r => r.ToDouble()).ToList();
+            if (index >= 0 && index < rationals.Count)
             {
-                return (float) rationals[index].ToDouble();
+                return (float) rationals[index];
             }
-            throw new Exception($"Index out of range: {index} > {rationals.Length}");
+            throw new Exception($"Index out of range: {index} > {rationals.Count}");
         }
         
         private async Task SetLocation(DataContext context, Thumbnail thumbnail)
@@ -322,7 +322,17 @@ namespace PhotoBook.Common
                 thumbnail.Location = knownLocation;
                 return;
             }
-            var addresses = await _googleGeoCoder.ReverseGeocodeAsync(thumbnail.Latitude.Value, thumbnail.Longitude.Value);
+
+            IEnumerable<GoogleAddress> addresses = new List<GoogleAddress>();
+            try
+            {
+                addresses = await _googleGeoCoder.ReverseGeocodeAsync(thumbnail.Latitude.Value,
+                    thumbnail.Longitude.Value);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, $"Error getting thumbnail location for {thumbnail.FileName} ({thumbnail.Latitude.Value}, {thumbnail.Longitude.Value}): {ex.Message}: {ex}");
+            }
             var address = addresses.FirstOrDefault();
             if (address == null)
             {
@@ -387,28 +397,38 @@ namespace PhotoBook.Common
                 {
 
                     var path = GetFullPath(thumbnail);
-
-                    using (var img = Image.Load(path))
+                    if (!File.Exists(path))
                     {
-                        var fileCreateDateTime = GetImageCreateDate(img, path, thumbnail.FileName);
-                        var latitude = GetGpsValue(img, ExifTag.GPSLatitudeRef, ExifTag.GPSLatitude);
-                        var longitude = GetGpsValue(img, ExifTag.GPSLongitudeRef, ExifTag.GPSLongitude);
-                        var altitude = GetAltitude(img);
-                        if (thumbnail.FileCreateDateTime != fileCreateDateTime || thumbnail.Latitude != latitude ||
-                            thumbnail.Longitude != longitude || thumbnail.Altitude != altitude ||
-                            (_googleGeoCoder != null && longitude.HasValue && latitude.HasValue &&
-                             thumbnail.Location == null))
+                        Logger.Info($"Image does not exist anymore '{path}'. Skipping.");
+                        continue;
+                    }
+                    try
+                    {
+                        using (var img = Image.Load(path))
                         {
-                            thumbnail.Latitude = latitude;
-                            thumbnail.Longitude = longitude;
-                            thumbnail.Altitude = altitude;
-                            thumbnail.FileCreateDateTime = fileCreateDateTime;
+                            var fileCreateDateTime = GetImageCreateDate(img, path, thumbnail.FileName);
+                            var latitude = GetGpsValue(img, ExifTag.GPSLatitudeRef, ExifTag.GPSLatitude);
+                            var longitude = GetGpsValue(img, ExifTag.GPSLongitudeRef, ExifTag.GPSLongitude);
+                            var altitude = GetAltitude(img);
+                            if (thumbnail.FileCreateDateTime != fileCreateDateTime || thumbnail.Latitude != latitude ||
+                                thumbnail.Longitude != longitude || thumbnail.Altitude != altitude ||
+                                (_googleGeoCoder != null && longitude.HasValue && latitude.HasValue &&
+                                 thumbnail.Location == null))
+                            {
+                                thumbnail.Latitude = latitude;
+                                thumbnail.Longitude = longitude;
+                                thumbnail.Altitude = altitude;
+                                thumbnail.FileCreateDateTime = fileCreateDateTime;
 
-                            await SetLocation(context, thumbnail);
+                                await SetLocation(context, thumbnail);
 
-                            context.Entry(thumbnail).State = EntityState.Modified;
-                            modified++;
+                                context.Entry(thumbnail).State = EntityState.Modified;
+                                modified++;
+                            }
                         }
+                    }catch(Exception ex)
+                    {
+                        Logger.Error(ex, $"Error fixing image create date '{path}': {ex.Message} {ex}");
                     }
                 }
                 if (modified > 0)
