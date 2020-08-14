@@ -38,6 +38,14 @@ namespace PhotoBook.ImageFetcher
                         //This task will retag any faces that still need validation
                         fetcher.ReTagFaces();
                     }
+                    else if (taskName == "fetch")
+                    {
+                        tasks.Add(fetcher.Fetch());
+                    }
+                    else if (taskName == "fix-dates")
+                    {
+                        tasks.Add(fetcher.FixFileCreateDate());
+                    }
                     else
                     {
                         logger.Trace("Unknown task specified.");

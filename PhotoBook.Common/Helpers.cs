@@ -241,21 +241,28 @@ namespace PhotoBook.Common
                 return newImages;
             }
         }
-
+        
         private DateTime GetImageCreateDate(Image img, string path, string fileName)
         {
-            if (img.Metadata.ExifProfile != null && img.Metadata.ExifProfile.TryGetValue(ExifTag.DateTimeOriginal, out var exifValue) && exifValue != null && exifValue.Value is byte[] createDateBytes)//.Any(x => x == Base.Constants.ExifCreateDatePropertyId))
+            DateTime createDate;
+            if (img.Metadata.ExifProfile != null && img.Metadata.ExifProfile.TryGetValue(ExifTag.DateTimeOriginal, out var exifValue) && exifValue != null)//.Any(x => x == Base.Constants.ExifCreateDatePropertyId))
             {
-                return DateTime.Parse(new Regex(":").Replace(Encoding.UTF8.GetString(createDateBytes), "-", 2));
+                var createDateString = exifValue.Value as string;
+                if (exifValue.Value is byte[] createDateBytes)
+                {
+                    createDateString = Encoding.UTF8.GetString(createDateBytes);
+                }
+
+                if (!string.IsNullOrWhiteSpace(createDateString) && DateTime.TryParse(new Regex(":").Replace(createDateString, "-", 2),
+                        out createDate))
+                {
+                    return createDate;
+                }
             }
-            else
-            {
-                DateTime createDate;
-                return DateTime.TryParse(fileName.Replace(Path.GetExtension(fileName), string.Empty),
-                        out createDate)
-                        ? createDate
-                        : File.GetCreationTime(path);
-            }
+            return DateTime.TryParse(fileName.Replace(Path.GetExtension(fileName), string.Empty),
+                out createDate)
+                ? createDate
+                : File.GetCreationTime(path);
         }
 
         private float? GetGpsValue(Image img, ExifTag propItemRefValue, ExifTag propItemValue)
