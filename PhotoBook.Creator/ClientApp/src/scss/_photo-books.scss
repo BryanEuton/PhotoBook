@@ -1,0 +1,18 @@
+﻿form.photobook-form {
+    label {
+        font-weight: bold;
+    }
+}
+.photoBooks {
+    > .btn {
+        margin-bottom: 20px;
+    }
+
+    .photoBook {
+        margin-bottom: 10px;
+
+        .btn + .btn {
+            margin-left: 10px;
+        }
+    }
+}

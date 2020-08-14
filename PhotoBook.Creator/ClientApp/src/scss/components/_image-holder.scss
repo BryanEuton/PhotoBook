@@ -1,0 +1,47 @@
+﻿.image-holder, .face-image {
+    position: relative;
+    font-size: .88rem;
+
+    svg {
+        margin-left: 10px;
+        &.loading {
+            display: block;
+            margin: 0 auto;
+        }
+    }
+
+    .wrapper {
+        /*position: absolute;*/
+    }
+
+    .face-map {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: 1px solid #f00;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    .face-tag-links button{
+        cursor: pointer;
+        display: block;
+         + button {
+             margin-top: 10px;
+         }
+    }
+}
+@media (max-width: 768px){
+    .image-holder, .face-image {
+
+        svg {
+            margin-left: 15px;
+        }
+
+        img {
+            width: 100%;
+        }
+    }
+}

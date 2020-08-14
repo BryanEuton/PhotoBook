@@ -1,0 +1,41 @@
+﻿.face-swapper {
+    .up, .center, .down {
+        text-align: center;
+    }
+    .up .dropdown {
+        margin-bottom: 10px;
+    }
+    .center {
+        .face-image {
+            display: inline-block;
+        }
+    }
+    label {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .face-swapper {
+        .middle {
+            position: relative;
+            .left, .right {
+                position: absolute;
+                top: 20px;
+                padding: 0;
+                width: 28px;
+                word-break: break-all;
+                z-index: 10;
+                .dropdown,.btn {
+                    margin-right: 0;
+                }
+            }
+            .left {
+                left: 0;
+            }
+            .right {
+                right: 0;
+            }
+        }
+    }
+}

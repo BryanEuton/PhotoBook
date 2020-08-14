@@ -1,0 +1,28 @@
+﻿.face-modal {
+
+    img {
+        max-width: 100%;
+    }
+
+    input[type='text'] {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .center {
+        text-align: center;
+        position: relative;
+        .dropdown{
+            margin-top: 10px;
+        }
+    }
+
+    [role='alert'] {
+        margin-top: 10px;
+        color: #f00;
+    }
+
+    .btn-group {
+        margin-top: 20px;
+    }
+}

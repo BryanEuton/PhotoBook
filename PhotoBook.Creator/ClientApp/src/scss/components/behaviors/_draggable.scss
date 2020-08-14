@@ -1,0 +1,11 @@
+﻿.draggable {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    &.drag-enabled{
+        .div-map {
+            border: 1px solid #39FF14;
+        }
+    }
+}

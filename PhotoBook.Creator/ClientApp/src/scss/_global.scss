@@ -1,0 +1,49 @@
+﻿a {
+    color: #0366d6;
+}
+
+code {
+    color: #E01A76;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.div-calendar {
+    display: block;
+    outline: none;
+    margin-top: 10px;
+}
+
+.dropdown, .btn {
+    margin-right: 10px;
+}
+.dropdown-menu .dropdown {
+    margin-right: 0;
+}
+.dropdown-item {
+    > svg.svg-inline--fa {
+        float: right;
+        margin-top: 4px;
+    }
+}
+.dropdown-menu > .dropdown  {
+    padding: 0.25rem 1.5rem;
+}
+button.link-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    display: inline;
+    margin: 0;
+    padding: 0;
+
+    &:hover,
+    &:focus {
+        text-decoration: none;
+    }
+}
