@@ -234,7 +234,7 @@ export class ImageMap extends Component {
       };
 
       if (coordsChanged(coords, this.state.coords)) {
-        console.log("map updated coords", coords, this.state.wrapper, image);
+        console.log(`map updated coords x: ${coords.x}, y: ${coords.y}, w: ${coords.width}, h: ${coords.height}`, this.state.wrapper, image);
         this.setState({ coords });
         this.props.onUpdate(coords);
       }

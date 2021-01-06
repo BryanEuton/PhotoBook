@@ -10,6 +10,7 @@ using PhotoBook.DataManager;
 using PhotoBook.Creator.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NLog;
 using PhotoBook.Creator.Models;
 using PhotoBook.DataManager.Models;
 
@@ -17,6 +18,7 @@ namespace PhotoBook.Creator.Controllers
 {
     public class CommentController : BaseController
     {
+        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly UserManager<ApplicationUser> _userManager;
         public CommentController(IConfiguration iConfiguration, DataContext context,
             UserManager<ApplicationUser> userManager) : base(iConfiguration, context)

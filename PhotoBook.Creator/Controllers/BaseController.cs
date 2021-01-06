@@ -23,7 +23,7 @@ namespace PhotoBook.Creator.Controllers
     [ApiController]
     public class BaseController : ControllerBase
     {
-        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         protected readonly DataContext Context;
         public IConfiguration Configuration { get; }
         public BaseController(IConfiguration iConfiguration, DataContext context)

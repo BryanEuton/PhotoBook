@@ -162,14 +162,12 @@ export const Image = props => {
   return (
     <div className="image-holder">
       { props.isGuest ? (
-
         <GuestImageContextMenu id={props.id} img={img} imgDetails={details}>
           <LazyLoad height={img.height} once placeholder={<Spinner />}>
             <img src={`/images/get/${props.id}`} ref={node => { setImgNode(node); }} alt={img.fileName} />
           </LazyLoad>
         </GuestImageContextMenu>)
           : (
-
           <ImageContextMenu id={props.id} img={img} imgDetails={details} displayAllFaces={props.displayAllFaces} displayFaces={displayFaces} toggleDisplayAllFaces={toggleDisplayAllFaces} toggleDisplayFaces={toggleDisplayFaces}>
             <LazyLoad height={img.height} once placeholder={<Spinner />}>
               <img src={`/images/get/${props.id}`} ref={node => { setImgNode(node); }} alt={img.fileName} />

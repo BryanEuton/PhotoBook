@@ -10,6 +10,7 @@ using PhotoBook.DataManager.Models;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NLog;
 using PhotoBook.Base;
 using PhotoBook.Creator.Filters;
 using PhotoBook.Creator.Models.Posts;
@@ -18,6 +19,7 @@ namespace PhotoBook.Creator.Controllers
 {
     public class SearchController : BaseController
     {
+        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public SearchController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
         {}
 

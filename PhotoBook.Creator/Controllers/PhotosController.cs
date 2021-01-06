@@ -9,11 +9,13 @@ using PhotoBook.Creator.Models;
 using PhotoBook.Creator.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NLog;
 
 namespace PhotoBook.Creator.Controllers
 {
     public class PhotosController : BaseController
     {
+        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public PhotosController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
         {}
 

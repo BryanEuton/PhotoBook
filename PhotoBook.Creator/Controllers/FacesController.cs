@@ -12,6 +12,7 @@ using PhotoBook.DataManager.Models;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NLog;
 using PhotoBook.Base;
 using PhotoBook.Creator.Filters;
 using PhotoBook.Creator.Models.Posts;
@@ -24,6 +25,8 @@ namespace PhotoBook.Creator.Controllers
 {
     public class FacesController : BaseController
     {
+        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public FacesController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context) { }
 
         [HttpGet]
@@ -64,10 +67,12 @@ namespace PhotoBook.Creator.Controllers
             }
             if (face.Width < 10)
             {
+                Logger.Trace($"Invalid width for face.  x: {face.X}, y: {face.Y}, w: {face.Width}, h: {face.Height}");
                 return AjaxFailedResult("Width must be greater than 10.");
             }
             if (face.Height < 10)
             {
+                Logger.Trace($"Invalid height for face.  x: {face.X}, y: {face.Y}, w: {face.Width}, h: {face.Height}");
                 return AjaxFailedResult("Height must be greater than 10.");
             }
             var thumbnail = Context.Thumbnails.FirstOrDefault(i => i.Id == face.ImageId);
@@ -112,6 +117,8 @@ namespace PhotoBook.Creator.Controllers
                 dbFace.RectY = face.Y;
                 dbFace.RectHeight = face.Height;
                 dbFace.RectWidth = face.Width;
+
+                Logger.Trace($"Face Moved.  x: {face.X}, y: {face.Y}, w: {face.Width}, h: {face.Height}, iW: {dbFace.ToFace().ImageWidth}, iH: {dbFace.ToFace().ImageHeight}");
 
                 using (var img = Image.Load(Helpers.GetFullPath(thumbnail)))
                 {

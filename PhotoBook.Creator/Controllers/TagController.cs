@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using NLog;
 using PhotoBook.Base;
 using PhotoBook.Creator.Filters;
 using PhotoBook.DataManager.Models;
@@ -15,6 +16,7 @@ namespace PhotoBook.Creator.Controllers
 {
     public class TagController : BaseController
     {
+        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public TagController(IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
         { }
 

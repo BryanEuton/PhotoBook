@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { forceVisible } from 'react-lazyload';
 import { ContextMenu } from './ContextMenu';
 import { FaceContextMenu } from './FaceContextMenu';
 import { faceService, locationService, photoService, photoBookService, tagService } from '../services';
@@ -300,6 +301,10 @@ export class ImageContextMenu extends Component {
   enlargeClosed(e) {
     this.setState({ enlarge: false });
   }
+  forceImageLoad(e) {
+    this.handleContextMenuItemClick(e);
+    forceVisible();
+  }
   newLocation(e) {
     this.handleContextMenuItemClick(e);
     if (this.state.openNewLocation || this.locationChanging) {
@@ -436,45 +441,7 @@ export class ImageContextMenu extends Component {
     );
   }
   renderMenu()
-{
-    //return (
-    //  <Dropdown isOpen={this.state.openContextMenu} toggle={e => this.setState({ openContextMenu: false })}>
-    //  <DropdownToggle tag="span">Test</DropdownToggle>
-    //    <DropdownMenu> 
-    //      <Dropdown isOpen={this.state.activeTab === "photobook"} toggle={e => this.activateMenuItem(e, "photobook")} onMouseOver={e => this.activateMenuItem(e, "photobook")} onClick={e => this.activateMenuItem(e, "photobook")} direction="right">
-    //        <DropdownToggle tag="span">Photo Books</DropdownToggle>
-
-    //        <DropdownMenu>
-    //          {
-    //            this.state.photoBooks.map(pb => this.renderMenuItem(pb, this.state.img.photoBooks))
-    //          }
-    //        </DropdownMenu>
-    //      </Dropdown>
-    //      <TagDropdown isActive={this.state.activeTab === "tag"} onMouseOver={e => this.activateMenuItem(e, "tag")} openOnMouseOver={true} onClick={tag => this.handleTagClick(tag)} activeItems={this.state.img.tags} direction="right" />
-    //      <Dropdown isOpen={this.state.activeTab === "location"} toggle={e => this.activateMenuItem(e, "location")} onMouseOver={e => this.activateMenuItem(e, "location")} onClick={e => this.activateMenuItem(e, "location")} direction="right">
-    //        <DropdownToggle tag="span">Locations</DropdownToggle>
-    //        <DropdownMenu>
-    //          <DropdownItem onClick={this.newLocation}><span>New Location</span></DropdownItem>
-    //          {
-    //            this.state.states.map(st => this.renderMenuItem(st, [this.state.img.locationId]))
-    //          }
-    //        </DropdownMenu>
-    //      </Dropdown>
-    //      <Dropdown isOpen={this.state.activeTab === "faces"} toggle={e => this.activateMenuItem(e, "faces")} onMouseOver={e => this.activateMenuItem(e, "faces")} onClick={e => this.activateMenuItem(e, "faces")} direction="right">
-    //        <DropdownToggle tag="span">Faces</DropdownToggle>
-    //        <DropdownMenu>
-    //          <DropdownItem onClick={e => this.tagFace(e)}><span>Tag face</span></DropdownItem>
-    //          {this.state.img.faces.length === 0 ? null : <DropdownItem onClick={e => this.removeFaces(e)}><span>Remove all faces</span></DropdownItem>}
-    //          {this.state.img.faces.length === 0 ? null : <DropdownItem onClick={e => this.displayFaces(e)}><span>Display faces</span></DropdownItem>}
-    //          <DropdownItem onClick={e => this.displayAllFaces(e)}><span>Display all faces</span></DropdownItem>
-    //        </DropdownMenu>
-    //      </Dropdown>
-    //      <DropdownItem onMouseOver={e => this.activateMenuItem(e, "hide")} onClick={e => this.hide(e)}><span>Hide</span></DropdownItem>
-    //      <DropdownItem onMouseOver={e => this.activateMenuItem(e, "scan")} onClick={e => this.scan(e)}><span>Scan for faces</span></DropdownItem>
-    //      <DropdownItem onMouseOver={e => this.activateMenuItem(e, "enlarge")} onClick={e => this.enlarge(e)}><span>Enlarge</span></DropdownItem>
-    //    </DropdownMenu>
-    //  </Dropdown>
-    //  );
+  {
     return (
       <div className="dropdown-menu" ref={c => { this.menu = c;}}>
         <Dropdown isOpen={this.state.activeTab === "photobook"} toggle={e => this.toggleDropdown(e, "photobook")} onMouseOver={e => this.activateMenuItem(e, "photobook")} onClick={e => this.activateMenuItem(e, "photobook")} direction="right">
@@ -508,6 +475,7 @@ export class ImageContextMenu extends Component {
         <DropdownItem onMouseOver={e => this.activateMenuItem(e, "hide")} onClick={e => this.hide(e)} toggle={false}><span>Hide</span></DropdownItem>
         <DropdownItem onMouseOver={e => this.activateMenuItem(e, "scan")} onClick={e => this.scan(e)} toggle={false}><span>Scan for faces</span></DropdownItem>
         <DropdownItem onMouseOver={e => this.activateMenuItem(e, "enlarge")} onClick={e => this.enlarge(e)} toggle={false}><span>Enlarge</span></DropdownItem>
+        <DropdownItem onMouseOver={e => this.activateMenuItem(e, "force image load")} onClick={e => this.forceImageLoad(e)} toggle={false}><span>Force Image Load</span></DropdownItem>
       </div>
     );
   }

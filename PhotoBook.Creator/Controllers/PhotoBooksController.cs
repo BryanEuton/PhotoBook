@@ -14,6 +14,7 @@ using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NLog;
 using PhotoBook.Creator.Filters;
 using PhotoBook.DataManager.Models;
 
@@ -21,6 +22,7 @@ namespace PhotoBook.Creator.Controllers
 {
     public class PhotoBooksController : BaseController
     {
+        public readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private IHostingEnvironment _env;
         public PhotoBooksController(IHostingEnvironment env, IConfiguration iConfiguration, DataContext context) : base(iConfiguration, context)
         {

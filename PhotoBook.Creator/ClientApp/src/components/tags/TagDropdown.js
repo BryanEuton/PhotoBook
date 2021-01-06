@@ -12,7 +12,7 @@ export const TagDropdown = props => {
     [openDropdowns, setOpenDropdowns] = useState({}),
     [tagTypes, setTagTypes] = useState([]),
     [tagStoreVersion, setTagStoreVersion] = useState(0);
-
+  
   useEffect(() => {
     let ignore = false;
     function handleTagStoreChange(state, v) {
@@ -99,7 +99,9 @@ export const TagDropdown = props => {
     }
 
     const subscriptions = [tagStore.subscribe(tagStoreVersion, handleTagStoreChange)];
-
+    if (props.isActive !== isOpen) {
+      setIsOpen(props.isActive);
+    }
     return () => {
       ignore = true;
       subscriptions.map(s => {
@@ -109,7 +111,7 @@ export const TagDropdown = props => {
         return null;
       });
     }
-  }, [props.allowedTypes, props.includeNewPerson, tagStoreVersion]);
+  }, [props.isActive, props.allowedTypes, props.includeNewPerson, tagStoreVersion]);
   
   function toggle(e, item) {
     if (e.defaultPrevented) {
