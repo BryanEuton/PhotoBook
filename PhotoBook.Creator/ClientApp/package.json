@@ -9,7 +9,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.11.0",
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@lls/react-light-calendar": "^2.0.7",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bootstrap": "^4.4.1",
     "formik": "^2.1.4",
     "google-map-react": "^1.1.6",
